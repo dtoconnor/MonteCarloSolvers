@@ -284,9 +284,9 @@ def martonak_paper():
                 preannealingsched = np.linspace(preannealingtemp, pt, int((preannealingtemp - pt) / 0.05) + 1)
                 sa.Anneal(preannealingsched, 100, state_qmc, neighbors, rng)  # preannealing
                 configurations = np.tile(state_qmc, (trotterslices, 1)).T
-                qmc.QuantumAnneal(A_sch, B_sh, annealingmcsteps,
-                                  trotterslices, annealingtemp, nspins,
-                                  configurations, neighbors, rng)
+                qmc.QuantumAnnealGlobal(A_sch, B_sh, annealingmcsteps,
+                                        trotterslices, annealingtemp, nspins,
+                                        configurations, neighbors, rng)
                 minEnergy, minConfiguration = np.inf, []
                 for col in configurations.T:
                     candidateEnergy = sa.ClassicalIsingEnergy(col, isingJ)
@@ -303,10 +303,11 @@ def martonak_paper():
 
 def plot_sontoro():
     exps = [[1, 5], [1, 10], [1, 20], [1, 40]]
-    c_data = np.load(f'chain_sim_data/santoro_test2_CA.npy')
-    i_term = np.where(c_data[0, :] == 0)[0][0]
-    print( 'CA', c_data)
-    plt.plot(c_data[0, :i_term], c_data[1, :i_term] /6400, color='k', marker='x', ls='-')
+    if os.path.isfile(f'chain_sim_data/santoro_test2_CA.npy'):
+        c_data = np.load(f'chain_sim_data/santoro_test2_CA.npy')
+        i_term = np.where(c_data[0, :] == 0)[0][0]
+        print( 'CA', c_data)
+        plt.plot(c_data[0, :i_term], c_data[1, :i_term] /6400, color='k', marker='x', ls='-')
     for ind, (pt, trotterslices) in enumerate(exps):
         if os.path.isfile(f'chain_sim_data/santoro_test_PT={pt}_P={trotterslices}.npy'):
             q_data = np.load(f'chain_sim_data/santoro_test_PT={pt}_P={trotterslices}.npy')
