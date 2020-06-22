@@ -95,3 +95,25 @@ cpdef GenerateNeighbors(int nspins,
         np.save(savepath, nbs)
     return nbs
 
+@cython.embedsignature(True)
+def ClassicalIsingEnergy(spins, J):
+    """
+    Calculate energy for Ising graph @J in configuration @spins.
+    Generally not needed for the annealing process but useful to
+    have around at the end of simulations.
+
+    Args:
+        @spins (np.array, float): configuration of spins (values +/-1)
+        @J (np.ndarray, float): coupling matrix where off-diagonals
+                                store coupling values and diagonal
+                                stores local field biases
+
+    Returns:
+        float: the energy of configuration @spins in an Ising
+               system specified by @J
+    """
+    J = np.asarray(J.todense())
+    d = np.diag(np.diag(J))
+    np.fill_diagonal(J, 0.0)
+    return np.dot(spins, np.dot(J, spins)) + np.sum(np.dot(d,spins))
+
