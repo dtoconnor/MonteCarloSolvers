@@ -2154,6 +2154,7 @@ static PyObject *__pyx_f_7solvers_3qmc_QuantumAnnealWCL(__Pyx_memviewslice, __Py
 static PyObject *__pyx_f_7solvers_3qmc_DissaptiveQuantumAnnealWCL(__Pyx_memviewslice, __Pyx_memviewslice, int, float, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
 static PyObject *__pyx_f_7solvers_3qmc_QuantumAnnealWC(__Pyx_memviewslice, __Pyx_memviewslice, int, float, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
 static PyObject *__pyx_f_7solvers_3qmc_DissipativeQuantumAnnealWC2(__Pyx_memviewslice, __Pyx_memviewslice, int, float, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int, int __pyx_skip_dispatch); /*proto*/
+static PyObject *__pyx_f_7solvers_3qmc_DissipativeQuantumAnnealWC3(__Pyx_memviewslice, __Pyx_memviewslice, int, float, __Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice, int, int __pyx_skip_dispatch); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
 static void *__pyx_align_pointer(void *, size_t); /*proto*/
 static PyObject *__pyx_memoryview_new(PyObject *, int, int, __Pyx_TypeInfo *); /*proto*/
@@ -2437,7 +2438,7 @@ static PyObject *__pyx_pf_7solvers_3qmc_8QuantumAnnealWCL(CYTHON_UNUSED PyObject
 static PyObject *__pyx_pf_7solvers_3qmc_10DissaptiveQuantumAnnealWCL(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_A_sched, __Pyx_memviewslice __pyx_v_B_sched, int __pyx_v_mcsteps, float __pyx_v_temp, __Pyx_memviewslice __pyx_v_lookuptable, __Pyx_memviewslice __pyx_v_confs, __Pyx_memviewslice __pyx_v_nbs); /* proto */
 static PyObject *__pyx_pf_7solvers_3qmc_12QuantumAnnealWC(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_A_sched, __Pyx_memviewslice __pyx_v_B_sched, int __pyx_v_mcsteps, float __pyx_v_temp, __Pyx_memviewslice __pyx_v_confs, __Pyx_memviewslice __pyx_v_nbs); /* proto */
 static PyObject *__pyx_pf_7solvers_3qmc_14DissipativeQuantumAnnealWC2(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_A_sched, __Pyx_memviewslice __pyx_v_B_sched, int __pyx_v_mcsteps, float __pyx_v_temp, __Pyx_memviewslice __pyx_v_lookuptable, __Pyx_memviewslice __pyx_v_confs, __Pyx_memviewslice __pyx_v_nbs, int __pyx_v_nthreads); /* proto */
-static PyObject *__pyx_pf_7solvers_3qmc_16DissipativeQuantumAnnealWC2(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_A_sched, __Pyx_memviewslice __pyx_v_B_sched, int __pyx_v_mcsteps, float __pyx_v_temp, __Pyx_memviewslice __pyx_v_lookuptable, __Pyx_memviewslice __pyx_v_confs, __Pyx_memviewslice __pyx_v_nbs, int __pyx_v_nthreads); /* proto */
+static PyObject *__pyx_pf_7solvers_3qmc_16DissipativeQuantumAnnealWC3(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_A_sched, __Pyx_memviewslice __pyx_v_B_sched, int __pyx_v_mcsteps, float __pyx_v_temp, __Pyx_memviewslice __pyx_v_lookuptable, __Pyx_memviewslice __pyx_v_confs, __Pyx_memviewslice __pyx_v_nbs, int __pyx_v_nthreads); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
@@ -10045,7 +10046,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
  *                                 p = 1 - cexp(ediff/teff)
  *                                 if r*p > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
  *                                     # add to cluster
- *                                     #r *= p
+ *                                     r *= p
  */
                     __pyx_t_39 = rand();
                     if (unlikely(((double)RAND_MAX) == 0)) {
@@ -10061,9 +10062,18 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
                     __pyx_t_35 = (((__pyx_v_r * __pyx_v_p) > (__pyx_t_39 / ((double)RAND_MAX))) != 0);
                     if (__pyx_t_35) {
 
+                      /* "solvers/qmc.pyx":731
+ *                                 if r*p > crand()/float(RAND_MAX):
+ *                                     # add to cluster
+ *                                     r *= p             # <<<<<<<<<<<<<<
+ *                                     cluster[stackidx, 0] = spinidx
+ *                                     cluster[stackidx, 1] = islice
+ */
+                      __pyx_v_r = (__pyx_v_r * __pyx_v_p);
+
                       /* "solvers/qmc.pyx":732
  *                                     # add to cluster
- *                                     #r *= p
+ *                                     r *= p
  *                                     cluster[stackidx, 0] = spinidx             # <<<<<<<<<<<<<<
  *                                     cluster[stackidx, 1] = islice
  *                                     confs[spinidx, islice] *= -1
@@ -10073,7 +10083,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
                       *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_48, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_49, __pyx_pybuffernd_cluster.diminfo[1].strides) = __pyx_v_spinidx;
 
                       /* "solvers/qmc.pyx":733
- *                                     #r *= p
+ *                                     r *= p
  *                                     cluster[stackidx, 0] = spinidx
  *                                     cluster[stackidx, 1] = islice             # <<<<<<<<<<<<<<
  *                                     confs[spinidx, islice] *= -1
@@ -10117,7 +10127,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
  *                                 p = 1 - cexp(ediff/teff)
  *                                 if r*p > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
  *                                     # add to cluster
- *                                     #r *= p
+ *                                     r *= p
  */
                     }
 
@@ -10357,7 +10367,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
  *                             p = 1 - cexp(ediff/teff)
  *                             if r*p > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
  *                                 # add to cluster
- *                                 #r *= p
+ *                                 r *= p
  */
                   __pyx_t_17 = rand();
                   if (unlikely(((double)RAND_MAX) == 0)) {
@@ -10373,9 +10383,18 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
                   __pyx_t_35 = (((__pyx_v_r * __pyx_v_p) > (__pyx_t_17 / ((double)RAND_MAX))) != 0);
                   if (__pyx_t_35) {
 
+                    /* "solvers/qmc.pyx":759
+ *                             if r*p > crand()/float(RAND_MAX):
+ *                                 # add to cluster
+ *                                 r *= p             # <<<<<<<<<<<<<<
+ *                                 cluster[stackidx, 0] = ispin
+ *                                 cluster[stackidx, 1] = tleft
+ */
+                    __pyx_v_r = (__pyx_v_r * __pyx_v_p);
+
                     /* "solvers/qmc.pyx":760
  *                                 # add to cluster
- *                                 #r *= p
+ *                                 r *= p
  *                                 cluster[stackidx, 0] = ispin             # <<<<<<<<<<<<<<
  *                                 cluster[stackidx, 1] = tleft
  *                                 confs[ispin, tleft] *= -1
@@ -10385,7 +10404,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
                     *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_62, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_63, __pyx_pybuffernd_cluster.diminfo[1].strides) = __pyx_v_ispin;
 
                     /* "solvers/qmc.pyx":761
- *                                 #r *= p
+ *                                 r *= p
  *                                 cluster[stackidx, 0] = ispin
  *                                 cluster[stackidx, 1] = tleft             # <<<<<<<<<<<<<<
  *                                 confs[ispin, tleft] *= -1
@@ -10429,7 +10448,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
  *                             p = 1 - cexp(ediff/teff)
  *                             if r*p > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
  *                                 # add to cluster
- *                                 #r *= p
+ *                                 r *= p
  */
                   }
 
@@ -10571,7 +10590,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
  *                             p = 1 - cexp(ediff/teff)
  *                             if r*p > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
  *                                 # add to cluster
- *                                 #r *= p
+ *                                 r *= p
  */
                   __pyx_t_17 = rand();
                   if (unlikely(((double)RAND_MAX) == 0)) {
@@ -10587,9 +10606,18 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
                   __pyx_t_35 = (((__pyx_v_r * __pyx_v_p) > (__pyx_t_17 / ((double)RAND_MAX))) != 0);
                   if (__pyx_t_35) {
 
+                    /* "solvers/qmc.pyx":777
+ *                             if r*p > crand()/float(RAND_MAX):
+ *                                 # add to cluster
+ *                                 r *= p             # <<<<<<<<<<<<<<
+ *                                 cluster[stackidx, 0] = ispin
+ *                                 cluster[stackidx, 1] = tright
+ */
+                    __pyx_v_r = (__pyx_v_r * __pyx_v_p);
+
                     /* "solvers/qmc.pyx":778
  *                                 # add to cluster
- *                                 #r *= p
+ *                                 r *= p
  *                                 cluster[stackidx, 0] = ispin             # <<<<<<<<<<<<<<
  *                                 cluster[stackidx, 1] = tright
  *                                 confs[ispin, tright] *= -1
@@ -10599,7 +10627,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
                     *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_76, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_77, __pyx_pybuffernd_cluster.diminfo[1].strides) = __pyx_v_ispin;
 
                     /* "solvers/qmc.pyx":779
- *                                 #r *= p
+ *                                 r *= p
  *                                 cluster[stackidx, 0] = ispin
  *                                 cluster[stackidx, 1] = tright             # <<<<<<<<<<<<<<
  *                                 confs[ispin, tright] *= -1
@@ -10643,7 +10671,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
  *                             p = 1 - cexp(ediff/teff)
  *                             if r*p > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
  *                                 # add to cluster
- *                                 #r *= p
+ *                                 r *= p
  */
                   }
 
@@ -17722,13 +17750,13 @@ static PyObject *__pyx_pf_7solvers_3qmc_14DissipativeQuantumAnnealWC2(CYTHON_UNU
 /* "solvers/qmc.pyx":1452
  * @cython.wraparound(False)
  * @cython.embedsignature(True)
- * cpdef DissipativeQuantumAnnealWC2(np.float_t[:] A_sched,             # <<<<<<<<<<<<<<
+ * cpdef DissipativeQuantumAnnealWC3(np.float_t[:] A_sched,             # <<<<<<<<<<<<<<
  *                              np.float_t[:] B_sched,
  *                              int mcsteps,
  */
 
-static PyObject *__pyx_pw_7solvers_3qmc_17DissipativeQuantumAnnealWC2(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_f_7solvers_3qmc_DissipativeQuantumAnnealWC2(__Pyx_memviewslice __pyx_v_A_sched, __Pyx_memviewslice __pyx_v_B_sched, int __pyx_v_mcsteps, float __pyx_v_temp, __Pyx_memviewslice __pyx_v_lookuptable, __Pyx_memviewslice __pyx_v_confs, __Pyx_memviewslice __pyx_v_nbs, CYTHON_UNUSED int __pyx_v_nthreads, CYTHON_UNUSED int __pyx_skip_dispatch) {
+static PyObject *__pyx_pw_7solvers_3qmc_17DissipativeQuantumAnnealWC3(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_f_7solvers_3qmc_DissipativeQuantumAnnealWC3(__Pyx_memviewslice __pyx_v_A_sched, __Pyx_memviewslice __pyx_v_B_sched, int __pyx_v_mcsteps, float __pyx_v_temp, __Pyx_memviewslice __pyx_v_lookuptable, __Pyx_memviewslice __pyx_v_confs, __Pyx_memviewslice __pyx_v_nbs, CYTHON_UNUSED int __pyx_v_nthreads, CYTHON_UNUSED int __pyx_skip_dispatch) {
   int __pyx_v_maxnb;
   int __pyx_v_nspins;
   int __pyx_v_slices;
@@ -17740,35 +17768,36 @@ static PyObject *__pyx_f_7solvers_3qmc_DissipativeQuantumAnnealWC2(__Pyx_memview
   CYTHON_UNUSED int __pyx_v_islice2;
   int __pyx_v_ispin;
   int __pyx_v_si;
-  int __pyx_v_si2;
+  CYTHON_UNUSED int __pyx_v_si2;
   int __pyx_v_spinidx;
-  int __pyx_v_spinidx2;
-  int __pyx_v_sidx;
+  CYTHON_UNUSED int __pyx_v_spinidx2;
+  CYTHON_UNUSED int __pyx_v_sidx;
   int __pyx_v_sidx2;
   double __pyx_v_jval;
-  double __pyx_v_ediff;
+  CYTHON_UNUSED double __pyx_v_ediff;
   double __pyx_v_b_coeff;
   int __pyx_v_tleft;
   int __pyx_v_tright;
   double __pyx_v_teff;
   CYTHON_UNUSED double __pyx_v_pi;
-  PyArrayObject *__pyx_v_ediffs = 0;
+  CYTHON_UNUSED PyArrayObject *__pyx_v_ediffs = 0;
   PyArrayObject *__pyx_v_ispins = 0;
   int __pyx_v_t;
   int __pyx_v_i;
   int __pyx_v_j;
   int __pyx_v_b;
-  int __pyx_v_b2;
+  CYTHON_UNUSED int __pyx_v_b2;
   int __pyx_v_bslice;
-  int __pyx_v_cslice;
+  CYTHON_UNUSED int __pyx_v_cslice;
   PyArrayObject *__pyx_v_cluster = 0;
   int __pyx_v_k;
   int __pyx_v_stack;
   int __pyx_v_stackidx;
   int __pyx_v_cluster_count;
   double __pyx_v_r;
-  int __pyx_v_tleft2;
-  int __pyx_v_tright2;
+  CYTHON_UNUSED int __pyx_v_tleft2;
+  CYTHON_UNUSED int __pyx_v_tright2;
+  double __pyx_v_e_total;
   double __pyx_v_p;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_cluster;
   __Pyx_Buffer __pyx_pybuffer_cluster;
@@ -17800,50 +17829,50 @@ static PyObject *__pyx_f_7solvers_3qmc_DissipativeQuantumAnnealWC2(__Pyx_memview
   int __pyx_t_20;
   int __pyx_t_21;
   int __pyx_t_22;
-  int __pyx_t_23;
-  int __pyx_t_24;
-  int __pyx_t_25;
+  Py_ssize_t __pyx_t_23;
+  Py_ssize_t __pyx_t_24;
+  Py_ssize_t __pyx_t_25;
   Py_ssize_t __pyx_t_26;
   Py_ssize_t __pyx_t_27;
-  Py_ssize_t __pyx_t_28;
-  Py_ssize_t __pyx_t_29;
-  Py_ssize_t __pyx_t_30;
+  int __pyx_t_28;
+  int __pyx_t_29;
+  int __pyx_t_30;
   Py_ssize_t __pyx_t_31;
   Py_ssize_t __pyx_t_32;
   Py_ssize_t __pyx_t_33;
-  int __pyx_t_34;
-  int __pyx_t_35;
-  int __pyx_t_36;
+  Py_ssize_t __pyx_t_34;
+  Py_ssize_t __pyx_t_35;
+  Py_ssize_t __pyx_t_36;
   Py_ssize_t __pyx_t_37;
   Py_ssize_t __pyx_t_38;
   Py_ssize_t __pyx_t_39;
   Py_ssize_t __pyx_t_40;
   Py_ssize_t __pyx_t_41;
   Py_ssize_t __pyx_t_42;
-  int __pyx_t_43;
-  Py_ssize_t __pyx_t_44;
-  Py_ssize_t __pyx_t_45;
-  Py_ssize_t __pyx_t_46;
+  Py_ssize_t __pyx_t_43;
+  int __pyx_t_44;
+  int __pyx_t_45;
+  int __pyx_t_46;
   Py_ssize_t __pyx_t_47;
   Py_ssize_t __pyx_t_48;
   Py_ssize_t __pyx_t_49;
   Py_ssize_t __pyx_t_50;
   Py_ssize_t __pyx_t_51;
   Py_ssize_t __pyx_t_52;
-  Py_ssize_t __pyx_t_53;
+  int __pyx_t_53;
   Py_ssize_t __pyx_t_54;
   Py_ssize_t __pyx_t_55;
   Py_ssize_t __pyx_t_56;
   Py_ssize_t __pyx_t_57;
   Py_ssize_t __pyx_t_58;
   Py_ssize_t __pyx_t_59;
-  Py_ssize_t __pyx_t_60;
+  int __pyx_t_60;
   Py_ssize_t __pyx_t_61;
   Py_ssize_t __pyx_t_62;
   Py_ssize_t __pyx_t_63;
   Py_ssize_t __pyx_t_64;
   Py_ssize_t __pyx_t_65;
-  int __pyx_t_66;
+  Py_ssize_t __pyx_t_66;
   Py_ssize_t __pyx_t_67;
   Py_ssize_t __pyx_t_68;
   Py_ssize_t __pyx_t_69;
@@ -17853,52 +17882,7 @@ static PyObject *__pyx_f_7solvers_3qmc_DissipativeQuantumAnnealWC2(__Pyx_memview
   Py_ssize_t __pyx_t_73;
   Py_ssize_t __pyx_t_74;
   Py_ssize_t __pyx_t_75;
-  Py_ssize_t __pyx_t_76;
-  Py_ssize_t __pyx_t_77;
-  Py_ssize_t __pyx_t_78;
-  Py_ssize_t __pyx_t_79;
-  Py_ssize_t __pyx_t_80;
-  Py_ssize_t __pyx_t_81;
-  Py_ssize_t __pyx_t_82;
-  Py_ssize_t __pyx_t_83;
-  Py_ssize_t __pyx_t_84;
-  Py_ssize_t __pyx_t_85;
-  Py_ssize_t __pyx_t_86;
-  Py_ssize_t __pyx_t_87;
-  Py_ssize_t __pyx_t_88;
-  Py_ssize_t __pyx_t_89;
-  Py_ssize_t __pyx_t_90;
-  Py_ssize_t __pyx_t_91;
-  Py_ssize_t __pyx_t_92;
-  Py_ssize_t __pyx_t_93;
-  Py_ssize_t __pyx_t_94;
-  Py_ssize_t __pyx_t_95;
-  Py_ssize_t __pyx_t_96;
-  Py_ssize_t __pyx_t_97;
-  Py_ssize_t __pyx_t_98;
-  Py_ssize_t __pyx_t_99;
-  Py_ssize_t __pyx_t_100;
-  Py_ssize_t __pyx_t_101;
-  Py_ssize_t __pyx_t_102;
-  Py_ssize_t __pyx_t_103;
-  Py_ssize_t __pyx_t_104;
-  Py_ssize_t __pyx_t_105;
-  Py_ssize_t __pyx_t_106;
-  Py_ssize_t __pyx_t_107;
-  Py_ssize_t __pyx_t_108;
-  Py_ssize_t __pyx_t_109;
-  Py_ssize_t __pyx_t_110;
-  Py_ssize_t __pyx_t_111;
-  Py_ssize_t __pyx_t_112;
-  Py_ssize_t __pyx_t_113;
-  Py_ssize_t __pyx_t_114;
-  Py_ssize_t __pyx_t_115;
-  Py_ssize_t __pyx_t_116;
-  Py_ssize_t __pyx_t_117;
-  Py_ssize_t __pyx_t_118;
-  Py_ssize_t __pyx_t_119;
-  Py_ssize_t __pyx_t_120;
-  __Pyx_RefNannySetupContext("DissipativeQuantumAnnealWC2", 0);
+  __Pyx_RefNannySetupContext("DissipativeQuantumAnnealWC3", 0);
   __pyx_pybuffer_ediffs.pybuffer.buf = NULL;
   __pyx_pybuffer_ediffs.refcount = 0;
   __pyx_pybuffernd_ediffs.data = NULL;
@@ -18198,7 +18182,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
   __pyx_t_9 = ((PyArrayObject *)__pyx_t_2);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_ediffs.rcbuffer->pybuffer, (PyObject*)__pyx_t_9, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 2, 0, __pyx_stack) == -1)) {
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_ediffs.rcbuffer->pybuffer, (PyObject*)__pyx_t_9, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
       __pyx_v_ediffs = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.buf = NULL;
       __PYX_ERR(0, 1522, __pyx_L1_error)
     } else {__pyx_pybuffernd_ediffs.diminfo[0].strides = __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_ediffs.diminfo[0].shape = __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_ediffs.diminfo[1].strides = __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_ediffs.diminfo[1].shape = __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.shape[1];
@@ -18423,7 +18407,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
  *     cdef double r = 1.0
  *     cdef int tleft2 = 0             # <<<<<<<<<<<<<<
  *     cdef int tright2 = 0
- * 
+ *     cdef double e_total = 0.0
  */
   __pyx_v_tleft2 = 0;
 
@@ -18431,13 +18415,22 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
  *     cdef double r = 1.0
  *     cdef int tleft2 = 0
  *     cdef int tright2 = 0             # <<<<<<<<<<<<<<
+ *     cdef double e_total = 0.0
  * 
- *     with nogil:
  */
   __pyx_v_tright2 = 0;
 
-  /* "solvers/qmc.pyx":1540
+  /* "solvers/qmc.pyx":1539
+ *     cdef int tleft2 = 0
  *     cdef int tright2 = 0
+ *     cdef double e_total = 0.0             # <<<<<<<<<<<<<<
+ * 
+ *     with nogil:
+ */
+  __pyx_v_e_total = 0.0;
+
+  /* "solvers/qmc.pyx":1541
+ *     cdef double e_total = 0.0
  * 
  *     with nogil:             # <<<<<<<<<<<<<<
  *         for ifield in xrange(schedsize):
@@ -18451,7 +18444,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
       #endif
       /*try:*/ {
 
-        /* "solvers/qmc.pyx":1541
+        /* "solvers/qmc.pyx":1542
  * 
  *     with nogil:
  *         for ifield in xrange(schedsize):             # <<<<<<<<<<<<<<
@@ -18463,7 +18456,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
         for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
           __pyx_v_ifield = __pyx_t_13;
 
-          /* "solvers/qmc.pyx":1543
+          /* "solvers/qmc.pyx":1544
  *         for ifield in xrange(schedsize):
  *             # Calculate new coefficient for 1D Ising J
  *             jperp = -0.5*teff*clog(ctanh(A_sched[ifield]/teff))             # <<<<<<<<<<<<<<
@@ -18480,558 +18473,34 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
             #ifdef WITH_THREAD
             __Pyx_PyGILState_Release(__pyx_gilstate_save);
             #endif
-            __PYX_ERR(0, 1543, __pyx_L4_error)
+            __PYX_ERR(0, 1544, __pyx_L4_error)
           }
           __pyx_v_jperp = ((-0.5 * __pyx_v_teff) * log(tanh((__pyx_t_15 / __pyx_v_teff))));
 
-          /* "solvers/qmc.pyx":1544
+          /* "solvers/qmc.pyx":1545
  *             # Calculate new coefficient for 1D Ising J
  *             jperp = -0.5*teff*clog(ctanh(A_sched[ifield]/teff))
  *             b_coeff = B_sched[ifield]             # <<<<<<<<<<<<<<
  *             for step in xrange(mcsteps):
- *                 # Loop over Trotter slices
+ *                 # Fisher-Yates shuffling algorithm
  */
           __pyx_t_16 = __pyx_v_ifield;
           __pyx_v_b_coeff = (*((__pyx_t_5numpy_float_t *) ( /* dim=0 */ (__pyx_v_B_sched.data + __pyx_t_16 * __pyx_v_B_sched.strides[0]) )));
 
-          /* "solvers/qmc.pyx":1545
+          /* "solvers/qmc.pyx":1546
  *             jperp = -0.5*teff*clog(ctanh(A_sched[ifield]/teff))
  *             b_coeff = B_sched[ifield]
  *             for step in xrange(mcsteps):             # <<<<<<<<<<<<<<
- *                 # Loop over Trotter slices
- *                 for islice in xrange(slices):
+ *                 # Fisher-Yates shuffling algorithm
+ *                 for i in xrange(nspins):
  */
           __pyx_t_17 = __pyx_v_mcsteps;
           __pyx_t_18 = __pyx_t_17;
           for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
             __pyx_v_step = __pyx_t_19;
 
-            /* "solvers/qmc.pyx":1547
+            /* "solvers/qmc.pyx":1548
  *             for step in xrange(mcsteps):
- *                 # Loop over Trotter slices
- *                 for islice in xrange(slices):             # <<<<<<<<<<<<<<
- *                     # Fisher-Yates shuffling algorithm
- *                     for i in xrange(nspins):
- */
-            __pyx_t_20 = __pyx_v_slices;
-            __pyx_t_21 = __pyx_t_20;
-            for (__pyx_t_22 = 0; __pyx_t_22 < __pyx_t_21; __pyx_t_22+=1) {
-              __pyx_v_islice = __pyx_t_22;
-
-              /* "solvers/qmc.pyx":1549
- *                 for islice in xrange(slices):
- *                     # Fisher-Yates shuffling algorithm
- *                     for i in xrange(nspins):             # <<<<<<<<<<<<<<
- *                         ispins[i] = i
- *                     for i in xrange(nspins, 0, -1):
- */
-              __pyx_t_23 = __pyx_v_nspins;
-              __pyx_t_24 = __pyx_t_23;
-              for (__pyx_t_25 = 0; __pyx_t_25 < __pyx_t_24; __pyx_t_25+=1) {
-                __pyx_v_i = __pyx_t_25;
-
-                /* "solvers/qmc.pyx":1550
- *                     # Fisher-Yates shuffling algorithm
- *                     for i in xrange(nspins):
- *                         ispins[i] = i             # <<<<<<<<<<<<<<
- *                     for i in xrange(nspins, 0, -1):
- *                         j = crand() % i
- */
-                __pyx_t_26 = __pyx_v_i;
-                *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_26, __pyx_pybuffernd_ispins.diminfo[0].strides) = __pyx_v_i;
-              }
-
-              /* "solvers/qmc.pyx":1551
- *                     for i in xrange(nspins):
- *                         ispins[i] = i
- *                     for i in xrange(nspins, 0, -1):             # <<<<<<<<<<<<<<
- *                         j = crand() % i
- *                         t = ispins[i-1]
- */
-              for (__pyx_t_23 = __pyx_v_nspins; __pyx_t_23 > 0; __pyx_t_23-=1) {
-                __pyx_v_i = __pyx_t_23;
-
-                /* "solvers/qmc.pyx":1552
- *                         ispins[i] = i
- *                     for i in xrange(nspins, 0, -1):
- *                         j = crand() % i             # <<<<<<<<<<<<<<
- *                         t = ispins[i-1]
- *                         ispins[i-1] = ispins[j]
- */
-                __pyx_t_24 = rand();
-                if (unlikely(__pyx_v_i == 0)) {
-                  #ifdef WITH_THREAD
-                  PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-                  #endif
-                  PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-                  #ifdef WITH_THREAD
-                  __Pyx_PyGILState_Release(__pyx_gilstate_save);
-                  #endif
-                  __PYX_ERR(0, 1552, __pyx_L4_error)
-                }
-                __pyx_v_j = __Pyx_mod_int(__pyx_t_24, __pyx_v_i);
-
-                /* "solvers/qmc.pyx":1553
- *                     for i in xrange(nspins, 0, -1):
- *                         j = crand() % i
- *                         t = ispins[i-1]             # <<<<<<<<<<<<<<
- *                         ispins[i-1] = ispins[j]
- *                         ispins[j] = t
- */
-                __pyx_t_27 = (__pyx_v_i - 1);
-                __pyx_v_t = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_27, __pyx_pybuffernd_ispins.diminfo[0].strides));
-
-                /* "solvers/qmc.pyx":1554
- *                         j = crand() % i
- *                         t = ispins[i-1]
- *                         ispins[i-1] = ispins[j]             # <<<<<<<<<<<<<<
- *                         ispins[j] = t
- *                     # Loop over spins
- */
-                __pyx_t_28 = __pyx_v_j;
-                __pyx_t_29 = (__pyx_v_i - 1);
-                *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_29, __pyx_pybuffernd_ispins.diminfo[0].strides) = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_28, __pyx_pybuffernd_ispins.diminfo[0].strides));
-
-                /* "solvers/qmc.pyx":1555
- *                         t = ispins[i-1]
- *                         ispins[i-1] = ispins[j]
- *                         ispins[j] = t             # <<<<<<<<<<<<<<
- *                     # Loop over spins
- *                     for sidx in xrange(nspins):
- */
-                __pyx_t_30 = __pyx_v_j;
-                *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_30, __pyx_pybuffernd_ispins.diminfo[0].strides) = __pyx_v_t;
-              }
-
-              /* "solvers/qmc.pyx":1557
- *                         ispins[j] = t
- *                     # Loop over spins
- *                     for sidx in xrange(nspins):             # <<<<<<<<<<<<<<
- *                         ispin = ispins[sidx]
- *                         ediffs[ispin, islice] = 0.0
- */
-              __pyx_t_23 = __pyx_v_nspins;
-              __pyx_t_24 = __pyx_t_23;
-              for (__pyx_t_25 = 0; __pyx_t_25 < __pyx_t_24; __pyx_t_25+=1) {
-                __pyx_v_sidx = __pyx_t_25;
-
-                /* "solvers/qmc.pyx":1558
- *                     # Loop over spins
- *                     for sidx in xrange(nspins):
- *                         ispin = ispins[sidx]             # <<<<<<<<<<<<<<
- *                         ediffs[ispin, islice] = 0.0
- *                         # loop through the neighbors
- */
-                __pyx_t_31 = __pyx_v_sidx;
-                __pyx_v_ispin = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_31, __pyx_pybuffernd_ispins.diminfo[0].strides));
-
-                /* "solvers/qmc.pyx":1559
- *                     for sidx in xrange(nspins):
- *                         ispin = ispins[sidx]
- *                         ediffs[ispin, islice] = 0.0             # <<<<<<<<<<<<<<
- *                         # loop through the neighbors
- *                         for si in xrange(maxnb):
- */
-                __pyx_t_32 = __pyx_v_ispin;
-                __pyx_t_33 = __pyx_v_islice;
-                *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float_t *, __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.buf, __pyx_t_32, __pyx_pybuffernd_ediffs.diminfo[0].strides, __pyx_t_33, __pyx_pybuffernd_ediffs.diminfo[1].strides) = 0.0;
-
-                /* "solvers/qmc.pyx":1561
- *                         ediffs[ispin, islice] = 0.0
- *                         # loop through the neighbors
- *                         for si in xrange(maxnb):             # <<<<<<<<<<<<<<
- *                             # get the neighbor spin index
- *                             spinidx = int(nbs[ispin, si, 0])
- */
-                __pyx_t_34 = __pyx_v_maxnb;
-                __pyx_t_35 = __pyx_t_34;
-                for (__pyx_t_36 = 0; __pyx_t_36 < __pyx_t_35; __pyx_t_36+=1) {
-                  __pyx_v_si = __pyx_t_36;
-
-                  /* "solvers/qmc.pyx":1563
- *                         for si in xrange(maxnb):
- *                             # get the neighbor spin index
- *                             spinidx = int(nbs[ispin, si, 0])             # <<<<<<<<<<<<<<
- *                             # get the coupling value to that neighbor
- *                             jval = nbs[ispin, si, 1]
- */
-                  __pyx_t_37 = __pyx_v_ispin;
-                  __pyx_t_38 = __pyx_v_si;
-                  __pyx_t_39 = 0;
-                  __pyx_v_spinidx = ((int)(*((__pyx_t_5numpy_float_t *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_nbs.data + __pyx_t_37 * __pyx_v_nbs.strides[0]) ) + __pyx_t_38 * __pyx_v_nbs.strides[1]) ) + __pyx_t_39 * __pyx_v_nbs.strides[2]) ))));
-
-                  /* "solvers/qmc.pyx":1565
- *                             spinidx = int(nbs[ispin, si, 0])
- *                             # get the coupling value to that neighbor
- *                             jval = nbs[ispin, si, 1]             # <<<<<<<<<<<<<<
- *                             # self-connections are not quadratic
- *                             if spinidx == ispin:
- */
-                  __pyx_t_40 = __pyx_v_ispin;
-                  __pyx_t_41 = __pyx_v_si;
-                  __pyx_t_42 = 1;
-                  __pyx_v_jval = (*((__pyx_t_5numpy_float_t *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_nbs.data + __pyx_t_40 * __pyx_v_nbs.strides[0]) ) + __pyx_t_41 * __pyx_v_nbs.strides[1]) ) + __pyx_t_42 * __pyx_v_nbs.strides[2]) )));
-
-                  /* "solvers/qmc.pyx":1567
- *                             jval = nbs[ispin, si, 1]
- *                             # self-connections are not quadratic
- *                             if spinidx == ispin:             # <<<<<<<<<<<<<<
- *                                 ediffs[ispin, islice] += -2.0*b_coeff*float(confs[ispin, islice])*jval
- *                             else:
- */
-                  __pyx_t_43 = ((__pyx_v_spinidx == __pyx_v_ispin) != 0);
-                  if (__pyx_t_43) {
-
-                    /* "solvers/qmc.pyx":1568
- *                             # self-connections are not quadratic
- *                             if spinidx == ispin:
- *                                 ediffs[ispin, islice] += -2.0*b_coeff*float(confs[ispin, islice])*jval             # <<<<<<<<<<<<<<
- *                             else:
- *                                 ediffs[ispin, islice] += -2.0*b_coeff*float(confs[ispin, islice])*(
- */
-                    __pyx_t_44 = __pyx_v_ispin;
-                    __pyx_t_45 = __pyx_v_islice;
-                    __pyx_t_46 = __pyx_v_ispin;
-                    __pyx_t_47 = __pyx_v_islice;
-                    *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float_t *, __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.buf, __pyx_t_46, __pyx_pybuffernd_ediffs.diminfo[0].strides, __pyx_t_47, __pyx_pybuffernd_ediffs.diminfo[1].strides) += (((-2.0 * __pyx_v_b_coeff) * ((double)(*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_44 * __pyx_v_confs.strides[0]) ) + __pyx_t_45 * __pyx_v_confs.strides[1]) ))))) * __pyx_v_jval);
-
-                    /* "solvers/qmc.pyx":1567
- *                             jval = nbs[ispin, si, 1]
- *                             # self-connections are not quadratic
- *                             if spinidx == ispin:             # <<<<<<<<<<<<<<
- *                                 ediffs[ispin, islice] += -2.0*b_coeff*float(confs[ispin, islice])*jval
- *                             else:
- */
-                    goto __pyx_L20;
-                  }
-
-                  /* "solvers/qmc.pyx":1570
- *                                 ediffs[ispin, islice] += -2.0*b_coeff*float(confs[ispin, islice])*jval
- *                             else:
- *                                 ediffs[ispin, islice] += -2.0*b_coeff*float(confs[ispin, islice])*(             # <<<<<<<<<<<<<<
- *                                     jval*float(confs[spinidx, islice])
- *                                 )
- */
-                  /*else*/ {
-                    __pyx_t_48 = __pyx_v_ispin;
-                    __pyx_t_49 = __pyx_v_islice;
-
-                    /* "solvers/qmc.pyx":1571
- *                             else:
- *                                 ediffs[ispin, islice] += -2.0*b_coeff*float(confs[ispin, islice])*(
- *                                     jval*float(confs[spinidx, islice])             # <<<<<<<<<<<<<<
- *                                 )
- *                         # periodic boundaries
- */
-                    __pyx_t_50 = __pyx_v_spinidx;
-                    __pyx_t_51 = __pyx_v_islice;
-
-                    /* "solvers/qmc.pyx":1570
- *                                 ediffs[ispin, islice] += -2.0*b_coeff*float(confs[ispin, islice])*jval
- *                             else:
- *                                 ediffs[ispin, islice] += -2.0*b_coeff*float(confs[ispin, islice])*(             # <<<<<<<<<<<<<<
- *                                     jval*float(confs[spinidx, islice])
- *                                 )
- */
-                    __pyx_t_52 = __pyx_v_ispin;
-                    __pyx_t_53 = __pyx_v_islice;
-                    *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float_t *, __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.buf, __pyx_t_52, __pyx_pybuffernd_ediffs.diminfo[0].strides, __pyx_t_53, __pyx_pybuffernd_ediffs.diminfo[1].strides) += (((-2.0 * __pyx_v_b_coeff) * ((double)(*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_48 * __pyx_v_confs.strides[0]) ) + __pyx_t_49 * __pyx_v_confs.strides[1]) ))))) * (__pyx_v_jval * ((double)(*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_50 * __pyx_v_confs.strides[0]) ) + __pyx_t_51 * __pyx_v_confs.strides[1]) ))))));
-                  }
-                  __pyx_L20:;
-                }
-
-                /* "solvers/qmc.pyx":1574
- *                                 )
- *                         # periodic boundaries
- *                         if islice == 0:             # <<<<<<<<<<<<<<
- *                             tleft = slices-1
- *                             tright = 1
- */
-                __pyx_t_43 = ((__pyx_v_islice == 0) != 0);
-                if (__pyx_t_43) {
-
-                  /* "solvers/qmc.pyx":1575
- *                         # periodic boundaries
- *                         if islice == 0:
- *                             tleft = slices-1             # <<<<<<<<<<<<<<
- *                             tright = 1
- *                         elif islice == slices-1:
- */
-                  __pyx_v_tleft = (__pyx_v_slices - 1);
-
-                  /* "solvers/qmc.pyx":1576
- *                         if islice == 0:
- *                             tleft = slices-1
- *                             tright = 1             # <<<<<<<<<<<<<<
- *                         elif islice == slices-1:
- *                             tleft = slices-2
- */
-                  __pyx_v_tright = 1;
-
-                  /* "solvers/qmc.pyx":1574
- *                                 )
- *                         # periodic boundaries
- *                         if islice == 0:             # <<<<<<<<<<<<<<
- *                             tleft = slices-1
- *                             tright = 1
- */
-                  goto __pyx_L21;
-                }
-
-                /* "solvers/qmc.pyx":1577
- *                             tleft = slices-1
- *                             tright = 1
- *                         elif islice == slices-1:             # <<<<<<<<<<<<<<
- *                             tleft = slices-2
- *                             tright = 0
- */
-                __pyx_t_43 = ((__pyx_v_islice == (__pyx_v_slices - 1)) != 0);
-                if (__pyx_t_43) {
-
-                  /* "solvers/qmc.pyx":1578
- *                             tright = 1
- *                         elif islice == slices-1:
- *                             tleft = slices-2             # <<<<<<<<<<<<<<
- *                             tright = 0
- *                         else:
- */
-                  __pyx_v_tleft = (__pyx_v_slices - 2);
-
-                  /* "solvers/qmc.pyx":1579
- *                         elif islice == slices-1:
- *                             tleft = slices-2
- *                             tright = 0             # <<<<<<<<<<<<<<
- *                         else:
- *                             tleft = islice-1
- */
-                  __pyx_v_tright = 0;
-
-                  /* "solvers/qmc.pyx":1577
- *                             tleft = slices-1
- *                             tright = 1
- *                         elif islice == slices-1:             # <<<<<<<<<<<<<<
- *                             tleft = slices-2
- *                             tright = 0
- */
-                  goto __pyx_L21;
-                }
-
-                /* "solvers/qmc.pyx":1581
- *                             tright = 0
- *                         else:
- *                             tleft = islice-1             # <<<<<<<<<<<<<<
- *                             tright = islice+1
- *                         # now calculate between neighboring slices
- */
-                /*else*/ {
-                  __pyx_v_tleft = (__pyx_v_islice - 1);
-
-                  /* "solvers/qmc.pyx":1582
- *                         else:
- *                             tleft = islice-1
- *                             tright = islice+1             # <<<<<<<<<<<<<<
- *                         # now calculate between neighboring slices
- *                         ediffs[ispin, islice] += 2.0*float(confs[ispin, islice])*(jperp*float(confs[ispin, tleft]))
- */
-                  __pyx_v_tright = (__pyx_v_islice + 1);
-                }
-                __pyx_L21:;
-
-                /* "solvers/qmc.pyx":1584
- *                             tright = islice+1
- *                         # now calculate between neighboring slices
- *                         ediffs[ispin, islice] += 2.0*float(confs[ispin, islice])*(jperp*float(confs[ispin, tleft]))             # <<<<<<<<<<<<<<
- *                         ediffs[ispin, islice] += 2.0*float(confs[ispin, islice])*(jperp*float(confs[ispin, tright]))
- *                         # system bath coupling
- */
-                __pyx_t_54 = __pyx_v_ispin;
-                __pyx_t_55 = __pyx_v_islice;
-                __pyx_t_56 = __pyx_v_ispin;
-                __pyx_t_57 = __pyx_v_tleft;
-                __pyx_t_58 = __pyx_v_ispin;
-                __pyx_t_59 = __pyx_v_islice;
-                *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float_t *, __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.buf, __pyx_t_58, __pyx_pybuffernd_ediffs.diminfo[0].strides, __pyx_t_59, __pyx_pybuffernd_ediffs.diminfo[1].strides) += ((2.0 * ((double)(*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_54 * __pyx_v_confs.strides[0]) ) + __pyx_t_55 * __pyx_v_confs.strides[1]) ))))) * (__pyx_v_jperp * ((double)(*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_56 * __pyx_v_confs.strides[0]) ) + __pyx_t_57 * __pyx_v_confs.strides[1]) ))))));
-
-                /* "solvers/qmc.pyx":1585
- *                         # now calculate between neighboring slices
- *                         ediffs[ispin, islice] += 2.0*float(confs[ispin, islice])*(jperp*float(confs[ispin, tleft]))
- *                         ediffs[ispin, islice] += 2.0*float(confs[ispin, islice])*(jperp*float(confs[ispin, tright]))             # <<<<<<<<<<<<<<
- *                         # system bath coupling
- *                         # system bath coupling
- */
-                __pyx_t_60 = __pyx_v_ispin;
-                __pyx_t_61 = __pyx_v_islice;
-                __pyx_t_62 = __pyx_v_ispin;
-                __pyx_t_63 = __pyx_v_tright;
-                __pyx_t_64 = __pyx_v_ispin;
-                __pyx_t_65 = __pyx_v_islice;
-                *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float_t *, __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.buf, __pyx_t_64, __pyx_pybuffernd_ediffs.diminfo[0].strides, __pyx_t_65, __pyx_pybuffernd_ediffs.diminfo[1].strides) += ((2.0 * ((double)(*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_60 * __pyx_v_confs.strides[0]) ) + __pyx_t_61 * __pyx_v_confs.strides[1]) ))))) * (__pyx_v_jperp * ((double)(*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_62 * __pyx_v_confs.strides[0]) ) + __pyx_t_63 * __pyx_v_confs.strides[1]) ))))));
-
-                /* "solvers/qmc.pyx":1588
- *                         # system bath coupling
- *                         # system bath coupling
- *                         for b2 in xrange(1, slices):             # <<<<<<<<<<<<<<
- *                             cslice = (bslice+b2)%slices
- *                             ediffs[ispin, islice] += 2.0*teff*float(confs[ispin, islice]*confs[
- */
-                __pyx_t_34 = __pyx_v_slices;
-                __pyx_t_35 = __pyx_t_34;
-                for (__pyx_t_36 = 1; __pyx_t_36 < __pyx_t_35; __pyx_t_36+=1) {
-                  __pyx_v_b2 = __pyx_t_36;
-
-                  /* "solvers/qmc.pyx":1589
- *                         # system bath coupling
- *                         for b2 in xrange(1, slices):
- *                             cslice = (bslice+b2)%slices             # <<<<<<<<<<<<<<
- *                             ediffs[ispin, islice] += 2.0*teff*float(confs[ispin, islice]*confs[
- *                                 ispin, cslice])*lookuptable[b2-1]
- */
-                  __pyx_t_66 = (__pyx_v_bslice + __pyx_v_b2);
-                  if (unlikely(__pyx_v_slices == 0)) {
-                    #ifdef WITH_THREAD
-                    PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-                    #endif
-                    PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-                    #ifdef WITH_THREAD
-                    __Pyx_PyGILState_Release(__pyx_gilstate_save);
-                    #endif
-                    __PYX_ERR(0, 1589, __pyx_L4_error)
-                  }
-                  __pyx_v_cslice = __Pyx_mod_int(__pyx_t_66, __pyx_v_slices);
-
-                  /* "solvers/qmc.pyx":1590
- *                         for b2 in xrange(1, slices):
- *                             cslice = (bslice+b2)%slices
- *                             ediffs[ispin, islice] += 2.0*teff*float(confs[ispin, islice]*confs[             # <<<<<<<<<<<<<<
- *                                 ispin, cslice])*lookuptable[b2-1]
- *                         # Accept or reject
- */
-                  __pyx_t_67 = __pyx_v_ispin;
-                  __pyx_t_68 = __pyx_v_islice;
-
-                  /* "solvers/qmc.pyx":1591
- *                             cslice = (bslice+b2)%slices
- *                             ediffs[ispin, islice] += 2.0*teff*float(confs[ispin, islice]*confs[
- *                                 ispin, cslice])*lookuptable[b2-1]             # <<<<<<<<<<<<<<
- *                         # Accept or reject
- *                         if ediffs[ispin, islice] <= 0.0:  # avoid overflow
- */
-                  __pyx_t_69 = __pyx_v_ispin;
-                  __pyx_t_70 = __pyx_v_cslice;
-
-                  /* "solvers/qmc.pyx":1590
- *                         for b2 in xrange(1, slices):
- *                             cslice = (bslice+b2)%slices
- *                             ediffs[ispin, islice] += 2.0*teff*float(confs[ispin, islice]*confs[             # <<<<<<<<<<<<<<
- *                                 ispin, cslice])*lookuptable[b2-1]
- *                         # Accept or reject
- */
-                  __pyx_t_71 = (__pyx_v_b2 - 1);
-
-                  /* "solvers/qmc.pyx":1591
- *                             cslice = (bslice+b2)%slices
- *                             ediffs[ispin, islice] += 2.0*teff*float(confs[ispin, islice]*confs[
- *                                 ispin, cslice])*lookuptable[b2-1]             # <<<<<<<<<<<<<<
- *                         # Accept or reject
- *                         if ediffs[ispin, islice] <= 0.0:  # avoid overflow
- */
-                  __pyx_t_72 = __pyx_v_ispin;
-                  __pyx_t_73 = __pyx_v_islice;
-                  *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float_t *, __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.buf, __pyx_t_72, __pyx_pybuffernd_ediffs.diminfo[0].strides, __pyx_t_73, __pyx_pybuffernd_ediffs.diminfo[1].strides) += (((2.0 * __pyx_v_teff) * ((double)((*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_67 * __pyx_v_confs.strides[0]) ) + __pyx_t_68 * __pyx_v_confs.strides[1]) ))) * (*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_69 * __pyx_v_confs.strides[0]) ) + __pyx_t_70 * __pyx_v_confs.strides[1]) )))))) * (*((__pyx_t_5numpy_float_t *) ( /* dim=0 */ (__pyx_v_lookuptable.data + __pyx_t_71 * __pyx_v_lookuptable.strides[0]) ))));
-                }
-
-                /* "solvers/qmc.pyx":1593
- *                                 ispin, cslice])*lookuptable[b2-1]
- *                         # Accept or reject
- *                         if ediffs[ispin, islice] <= 0.0:  # avoid overflow             # <<<<<<<<<<<<<<
- *                             confs[ispin, islice] *= -1
- *                         elif cexp(-1.0 * ediffs[ispin, islice]/teff) > crand()/float(RAND_MAX):
- */
-                __pyx_t_74 = __pyx_v_ispin;
-                __pyx_t_75 = __pyx_v_islice;
-                __pyx_t_43 = (((*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float_t *, __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.buf, __pyx_t_74, __pyx_pybuffernd_ediffs.diminfo[0].strides, __pyx_t_75, __pyx_pybuffernd_ediffs.diminfo[1].strides)) <= 0.0) != 0);
-                if (__pyx_t_43) {
-
-                  /* "solvers/qmc.pyx":1594
- *                         # Accept or reject
- *                         if ediffs[ispin, islice] <= 0.0:  # avoid overflow
- *                             confs[ispin, islice] *= -1             # <<<<<<<<<<<<<<
- *                         elif cexp(-1.0 * ediffs[ispin, islice]/teff) > crand()/float(RAND_MAX):
- *                             confs[ispin, islice] *= -1
- */
-                  __pyx_t_76 = __pyx_v_ispin;
-                  __pyx_t_77 = __pyx_v_islice;
-                  *((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_76 * __pyx_v_confs.strides[0]) ) + __pyx_t_77 * __pyx_v_confs.strides[1]) )) *= -1L;
-
-                  /* "solvers/qmc.pyx":1593
- *                                 ispin, cslice])*lookuptable[b2-1]
- *                         # Accept or reject
- *                         if ediffs[ispin, islice] <= 0.0:  # avoid overflow             # <<<<<<<<<<<<<<
- *                             confs[ispin, islice] *= -1
- *                         elif cexp(-1.0 * ediffs[ispin, islice]/teff) > crand()/float(RAND_MAX):
- */
-                  goto __pyx_L24;
-                }
-
-                /* "solvers/qmc.pyx":1595
- *                         if ediffs[ispin, islice] <= 0.0:  # avoid overflow
- *                             confs[ispin, islice] *= -1
- *                         elif cexp(-1.0 * ediffs[ispin, islice]/teff) > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
- *                             confs[ispin, islice] *= -1
- *                 # Fisher-Yates shuffling algorithm
- */
-                __pyx_t_78 = __pyx_v_ispin;
-                __pyx_t_79 = __pyx_v_islice;
-                __pyx_t_15 = (-1.0 * (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float_t *, __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.buf, __pyx_t_78, __pyx_pybuffernd_ediffs.diminfo[0].strides, __pyx_t_79, __pyx_pybuffernd_ediffs.diminfo[1].strides)));
-                if (unlikely(__pyx_v_teff == 0)) {
-                  #ifdef WITH_THREAD
-                  PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-                  #endif
-                  PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-                  #ifdef WITH_THREAD
-                  __Pyx_PyGILState_Release(__pyx_gilstate_save);
-                  #endif
-                  __PYX_ERR(0, 1595, __pyx_L4_error)
-                }
-                __pyx_t_34 = rand();
-                if (unlikely(((double)RAND_MAX) == 0)) {
-                  #ifdef WITH_THREAD
-                  PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-                  #endif
-                  PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-                  #ifdef WITH_THREAD
-                  __Pyx_PyGILState_Release(__pyx_gilstate_save);
-                  #endif
-                  __PYX_ERR(0, 1595, __pyx_L4_error)
-                }
-                __pyx_t_43 = ((exp((__pyx_t_15 / __pyx_v_teff)) > (__pyx_t_34 / ((double)RAND_MAX))) != 0);
-                if (__pyx_t_43) {
-
-                  /* "solvers/qmc.pyx":1596
- *                             confs[ispin, islice] *= -1
- *                         elif cexp(-1.0 * ediffs[ispin, islice]/teff) > crand()/float(RAND_MAX):
- *                             confs[ispin, islice] *= -1             # <<<<<<<<<<<<<<
- *                 # Fisher-Yates shuffling algorithm
- *                 for i in xrange(nspins):
- */
-                  __pyx_t_80 = __pyx_v_ispin;
-                  __pyx_t_81 = __pyx_v_islice;
-                  *((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_80 * __pyx_v_confs.strides[0]) ) + __pyx_t_81 * __pyx_v_confs.strides[1]) )) *= -1L;
-
-                  /* "solvers/qmc.pyx":1595
- *                         if ediffs[ispin, islice] <= 0.0:  # avoid overflow
- *                             confs[ispin, islice] *= -1
- *                         elif cexp(-1.0 * ediffs[ispin, islice]/teff) > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
- *                             confs[ispin, islice] *= -1
- *                 # Fisher-Yates shuffling algorithm
- */
-                }
-                __pyx_L24:;
-              }
-            }
-
-            /* "solvers/qmc.pyx":1598
- *                             confs[ispin, islice] *= -1
  *                 # Fisher-Yates shuffling algorithm
  *                 for i in xrange(nspins):             # <<<<<<<<<<<<<<
  *                     ispins[i] = i
@@ -19042,18 +18511,18 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
             for (__pyx_t_22 = 0; __pyx_t_22 < __pyx_t_21; __pyx_t_22+=1) {
               __pyx_v_i = __pyx_t_22;
 
-              /* "solvers/qmc.pyx":1599
+              /* "solvers/qmc.pyx":1549
  *                 # Fisher-Yates shuffling algorithm
  *                 for i in xrange(nspins):
  *                     ispins[i] = i             # <<<<<<<<<<<<<<
  *                 for i in xrange(nspins, 0, -1):
  *                     j = crand() % i
  */
-              __pyx_t_82 = __pyx_v_i;
-              *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_82, __pyx_pybuffernd_ispins.diminfo[0].strides) = __pyx_v_i;
+              __pyx_t_23 = __pyx_v_i;
+              *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_23, __pyx_pybuffernd_ispins.diminfo[0].strides) = __pyx_v_i;
             }
 
-            /* "solvers/qmc.pyx":1600
+            /* "solvers/qmc.pyx":1550
  *                 for i in xrange(nspins):
  *                     ispins[i] = i
  *                 for i in xrange(nspins, 0, -1):             # <<<<<<<<<<<<<<
@@ -19063,7 +18532,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
             for (__pyx_t_20 = __pyx_v_nspins; __pyx_t_20 > 0; __pyx_t_20-=1) {
               __pyx_v_i = __pyx_t_20;
 
-              /* "solvers/qmc.pyx":1601
+              /* "solvers/qmc.pyx":1551
  *                     ispins[i] = i
  *                 for i in xrange(nspins, 0, -1):
  *                     j = crand() % i             # <<<<<<<<<<<<<<
@@ -19079,525 +18548,473 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
                 #ifdef WITH_THREAD
                 __Pyx_PyGILState_Release(__pyx_gilstate_save);
                 #endif
-                __PYX_ERR(0, 1601, __pyx_L4_error)
+                __PYX_ERR(0, 1551, __pyx_L4_error)
               }
               __pyx_v_j = __Pyx_mod_int(__pyx_t_21, __pyx_v_i);
 
-              /* "solvers/qmc.pyx":1602
+              /* "solvers/qmc.pyx":1552
  *                 for i in xrange(nspins, 0, -1):
  *                     j = crand() % i
  *                     t = ispins[i-1]             # <<<<<<<<<<<<<<
  *                     ispins[i-1] = ispins[j]
  *                     ispins[j] = t
  */
-              __pyx_t_83 = (__pyx_v_i - 1);
-              __pyx_v_t = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_83, __pyx_pybuffernd_ispins.diminfo[0].strides));
+              __pyx_t_24 = (__pyx_v_i - 1);
+              __pyx_v_t = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_24, __pyx_pybuffernd_ispins.diminfo[0].strides));
 
-              /* "solvers/qmc.pyx":1603
+              /* "solvers/qmc.pyx":1553
  *                     j = crand() % i
  *                     t = ispins[i-1]
  *                     ispins[i-1] = ispins[j]             # <<<<<<<<<<<<<<
  *                     ispins[j] = t
  *                 # start wolff updates
  */
-              __pyx_t_84 = __pyx_v_j;
-              __pyx_t_85 = (__pyx_v_i - 1);
-              *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_85, __pyx_pybuffernd_ispins.diminfo[0].strides) = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_84, __pyx_pybuffernd_ispins.diminfo[0].strides));
+              __pyx_t_25 = __pyx_v_j;
+              __pyx_t_26 = (__pyx_v_i - 1);
+              *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_26, __pyx_pybuffernd_ispins.diminfo[0].strides) = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_25, __pyx_pybuffernd_ispins.diminfo[0].strides));
 
-              /* "solvers/qmc.pyx":1604
+              /* "solvers/qmc.pyx":1554
  *                     t = ispins[i-1]
  *                     ispins[i-1] = ispins[j]
  *                     ispins[j] = t             # <<<<<<<<<<<<<<
  *                 # start wolff updates
- *                 for sidx2 in xrange(nspins):
+ *                 for islice in xrange(slices):
  */
-              __pyx_t_86 = __pyx_v_j;
-              *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_86, __pyx_pybuffernd_ispins.diminfo[0].strides) = __pyx_v_t;
+              __pyx_t_27 = __pyx_v_j;
+              *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_27, __pyx_pybuffernd_ispins.diminfo[0].strides) = __pyx_v_t;
             }
 
-            /* "solvers/qmc.pyx":1606
+            /* "solvers/qmc.pyx":1556
  *                     ispins[j] = t
  *                 # start wolff updates
- *                 for sidx2 in xrange(nspins):             # <<<<<<<<<<<<<<
- *                     ispin = ispins[sidx2]
- *                     islice = crand() % slices
+ *                 for islice in xrange(slices):             # <<<<<<<<<<<<<<
+ *                     for sidx2 in xrange(nspins):
+ *                         e_total = 0.0
  */
-            __pyx_t_20 = __pyx_v_nspins;
+            __pyx_t_20 = __pyx_v_slices;
             __pyx_t_21 = __pyx_t_20;
             for (__pyx_t_22 = 0; __pyx_t_22 < __pyx_t_21; __pyx_t_22+=1) {
-              __pyx_v_sidx2 = __pyx_t_22;
+              __pyx_v_islice = __pyx_t_22;
 
-              /* "solvers/qmc.pyx":1607
+              /* "solvers/qmc.pyx":1557
  *                 # start wolff updates
- *                 for sidx2 in xrange(nspins):
- *                     ispin = ispins[sidx2]             # <<<<<<<<<<<<<<
- *                     islice = crand() % slices
- *                     cluster[0, 0] = ispin
+ *                 for islice in xrange(slices):
+ *                     for sidx2 in xrange(nspins):             # <<<<<<<<<<<<<<
+ *                         e_total = 0.0
+ *                         ispin = ispins[sidx2]
  */
-              __pyx_t_87 = __pyx_v_sidx2;
-              __pyx_v_ispin = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_87, __pyx_pybuffernd_ispins.diminfo[0].strides));
+              __pyx_t_28 = __pyx_v_nspins;
+              __pyx_t_29 = __pyx_t_28;
+              for (__pyx_t_30 = 0; __pyx_t_30 < __pyx_t_29; __pyx_t_30+=1) {
+                __pyx_v_sidx2 = __pyx_t_30;
 
-              /* "solvers/qmc.pyx":1608
- *                 for sidx2 in xrange(nspins):
- *                     ispin = ispins[sidx2]
- *                     islice = crand() % slices             # <<<<<<<<<<<<<<
- *                     cluster[0, 0] = ispin
- *                     cluster[0, 1] = islice
+                /* "solvers/qmc.pyx":1558
+ *                 for islice in xrange(slices):
+ *                     for sidx2 in xrange(nspins):
+ *                         e_total = 0.0             # <<<<<<<<<<<<<<
+ *                         ispin = ispins[sidx2]
+ *                         # islice = crand() % slices
  */
-              __pyx_t_23 = rand();
-              if (unlikely(__pyx_v_slices == 0)) {
-                #ifdef WITH_THREAD
-                PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-                #endif
-                PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-                #ifdef WITH_THREAD
-                __Pyx_PyGILState_Release(__pyx_gilstate_save);
-                #endif
-                __PYX_ERR(0, 1608, __pyx_L4_error)
-              }
-              __pyx_v_islice = __Pyx_mod_int(__pyx_t_23, __pyx_v_slices);
+                __pyx_v_e_total = 0.0;
 
-              /* "solvers/qmc.pyx":1609
- *                     ispin = ispins[sidx2]
- *                     islice = crand() % slices
- *                     cluster[0, 0] = ispin             # <<<<<<<<<<<<<<
- *                     cluster[0, 1] = islice
- *                     k = confs[ispin, islice]
+                /* "solvers/qmc.pyx":1559
+ *                     for sidx2 in xrange(nspins):
+ *                         e_total = 0.0
+ *                         ispin = ispins[sidx2]             # <<<<<<<<<<<<<<
+ *                         # islice = crand() % slices
+ *                         cluster[0, 0] = ispin
  */
-              __pyx_t_88 = 0;
-              __pyx_t_89 = 0;
-              *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_88, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_89, __pyx_pybuffernd_cluster.diminfo[1].strides) = __pyx_v_ispin;
+                __pyx_t_31 = __pyx_v_sidx2;
+                __pyx_v_ispin = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_31, __pyx_pybuffernd_ispins.diminfo[0].strides));
 
-              /* "solvers/qmc.pyx":1610
- *                     islice = crand() % slices
- *                     cluster[0, 0] = ispin
- *                     cluster[0, 1] = islice             # <<<<<<<<<<<<<<
- *                     k = confs[ispin, islice]
- *                     stack = 1
+                /* "solvers/qmc.pyx":1561
+ *                         ispin = ispins[sidx2]
+ *                         # islice = crand() % slices
+ *                         cluster[0, 0] = ispin             # <<<<<<<<<<<<<<
+ *                         cluster[0, 1] = islice
+ *                         k = confs[ispin, islice]
  */
-              __pyx_t_90 = 0;
-              __pyx_t_91 = 1;
-              *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_90, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_91, __pyx_pybuffernd_cluster.diminfo[1].strides) = __pyx_v_islice;
+                __pyx_t_32 = 0;
+                __pyx_t_33 = 0;
+                *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_32, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_33, __pyx_pybuffernd_cluster.diminfo[1].strides) = __pyx_v_ispin;
 
-              /* "solvers/qmc.pyx":1611
- *                     cluster[0, 0] = ispin
- *                     cluster[0, 1] = islice
- *                     k = confs[ispin, islice]             # <<<<<<<<<<<<<<
- *                     stack = 1
- *                     stackidx = 1
+                /* "solvers/qmc.pyx":1562
+ *                         # islice = crand() % slices
+ *                         cluster[0, 0] = ispin
+ *                         cluster[0, 1] = islice             # <<<<<<<<<<<<<<
+ *                         k = confs[ispin, islice]
+ *                         confs[ispin, islice] *= -1
  */
-              __pyx_t_92 = __pyx_v_ispin;
-              __pyx_t_93 = __pyx_v_islice;
-              __pyx_v_k = (*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_92 * __pyx_v_confs.strides[0]) ) + __pyx_t_93 * __pyx_v_confs.strides[1]) )));
+                __pyx_t_34 = 0;
+                __pyx_t_35 = 1;
+                *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_34, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_35, __pyx_pybuffernd_cluster.diminfo[1].strides) = __pyx_v_islice;
 
-              /* "solvers/qmc.pyx":1612
- *                     cluster[0, 1] = islice
- *                     k = confs[ispin, islice]
- *                     stack = 1             # <<<<<<<<<<<<<<
- *                     stackidx = 1
- *                     cluster_count = 0
+                /* "solvers/qmc.pyx":1563
+ *                         cluster[0, 0] = ispin
+ *                         cluster[0, 1] = islice
+ *                         k = confs[ispin, islice]             # <<<<<<<<<<<<<<
+ *                         confs[ispin, islice] *= -1
+ *                         stack = 1
  */
-              __pyx_v_stack = 1;
+                __pyx_t_36 = __pyx_v_ispin;
+                __pyx_t_37 = __pyx_v_islice;
+                __pyx_v_k = (*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_36 * __pyx_v_confs.strides[0]) ) + __pyx_t_37 * __pyx_v_confs.strides[1]) )));
 
-              /* "solvers/qmc.pyx":1613
- *                     k = confs[ispin, islice]
- *                     stack = 1
- *                     stackidx = 1             # <<<<<<<<<<<<<<
- *                     cluster_count = 0
- *                     r = 1.0
+                /* "solvers/qmc.pyx":1564
+ *                         cluster[0, 1] = islice
+ *                         k = confs[ispin, islice]
+ *                         confs[ispin, islice] *= -1             # <<<<<<<<<<<<<<
+ *                         stack = 1
+ *                         stackidx = 1
  */
-              __pyx_v_stackidx = 1;
+                __pyx_t_38 = __pyx_v_ispin;
+                __pyx_t_39 = __pyx_v_islice;
+                *((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_38 * __pyx_v_confs.strides[0]) ) + __pyx_t_39 * __pyx_v_confs.strides[1]) )) *= -1L;
 
-              /* "solvers/qmc.pyx":1614
- *                     stack = 1
- *                     stackidx = 1
- *                     cluster_count = 0             # <<<<<<<<<<<<<<
- *                     r = 1.0
- *                     while True:
+                /* "solvers/qmc.pyx":1565
+ *                         k = confs[ispin, islice]
+ *                         confs[ispin, islice] *= -1
+ *                         stack = 1             # <<<<<<<<<<<<<<
+ *                         stackidx = 1
+ *                         cluster_count = 0
  */
-              __pyx_v_cluster_count = 0;
+                __pyx_v_stack = 1;
 
-              /* "solvers/qmc.pyx":1615
- *                     stackidx = 1
- *                     cluster_count = 0
- *                     r = 1.0             # <<<<<<<<<<<<<<
- *                     while True:
- *                         ispin = cluster[cluster_count, 0]
+                /* "solvers/qmc.pyx":1566
+ *                         confs[ispin, islice] *= -1
+ *                         stack = 1
+ *                         stackidx = 1             # <<<<<<<<<<<<<<
+ *                         cluster_count = 0
+ *                         r = 1.0
  */
-              __pyx_v_r = 1.0;
+                __pyx_v_stackidx = 1;
 
-              /* "solvers/qmc.pyx":1616
- *                     cluster_count = 0
- *                     r = 1.0
- *                     while True:             # <<<<<<<<<<<<<<
- *                         ispin = cluster[cluster_count, 0]
- *                         islice = cluster[cluster_count, 1]
+                /* "solvers/qmc.pyx":1567
+ *                         stack = 1
+ *                         stackidx = 1
+ *                         cluster_count = 0             # <<<<<<<<<<<<<<
+ *                         r = 1.0
+ *                         while True:
  */
-              while (1) {
+                __pyx_v_cluster_count = 0;
 
-                /* "solvers/qmc.pyx":1617
- *                     r = 1.0
- *                     while True:
- *                         ispin = cluster[cluster_count, 0]             # <<<<<<<<<<<<<<
- *                         islice = cluster[cluster_count, 1]
- *                         # add bath neighbours
+                /* "solvers/qmc.pyx":1568
+ *                         stackidx = 1
+ *                         cluster_count = 0
+ *                         r = 1.0             # <<<<<<<<<<<<<<
+ *                         while True:
+ *                             ispin = cluster[cluster_count, 0]
  */
-                __pyx_t_94 = __pyx_v_cluster_count;
-                __pyx_t_95 = 0;
-                __pyx_v_ispin = (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_94, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_95, __pyx_pybuffernd_cluster.diminfo[1].strides));
+                __pyx_v_r = 1.0;
 
-                /* "solvers/qmc.pyx":1618
- *                     while True:
- *                         ispin = cluster[cluster_count, 0]
- *                         islice = cluster[cluster_count, 1]             # <<<<<<<<<<<<<<
- *                         # add bath neighbours
- *                         for b in xrange(1, slices):
+                /* "solvers/qmc.pyx":1569
+ *                         cluster_count = 0
+ *                         r = 1.0
+ *                         while True:             # <<<<<<<<<<<<<<
+ *                             ispin = cluster[cluster_count, 0]
+ *                             islice = cluster[cluster_count, 1]
  */
-                __pyx_t_96 = __pyx_v_cluster_count;
-                __pyx_t_97 = 1;
-                __pyx_v_islice = (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_96, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_97, __pyx_pybuffernd_cluster.diminfo[1].strides));
+                while (1) {
 
-                /* "solvers/qmc.pyx":1620
- *                         islice = cluster[cluster_count, 1]
- *                         # add bath neighbours
- *                         for b in xrange(1, slices):             # <<<<<<<<<<<<<<
- *                             bslice = (islice+b)%slices
- *                             if confs[ispin, bslice] == k:
+                  /* "solvers/qmc.pyx":1570
+ *                         r = 1.0
+ *                         while True:
+ *                             ispin = cluster[cluster_count, 0]             # <<<<<<<<<<<<<<
+ *                             islice = cluster[cluster_count, 1]
+ *                             # add energy
  */
-                __pyx_t_23 = __pyx_v_slices;
-                __pyx_t_24 = __pyx_t_23;
-                for (__pyx_t_25 = 1; __pyx_t_25 < __pyx_t_24; __pyx_t_25+=1) {
-                  __pyx_v_b = __pyx_t_25;
+                  __pyx_t_40 = __pyx_v_cluster_count;
+                  __pyx_t_41 = 0;
+                  __pyx_v_ispin = (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_40, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_41, __pyx_pybuffernd_cluster.diminfo[1].strides));
 
-                  /* "solvers/qmc.pyx":1621
- *                         # add bath neighbours
- *                         for b in xrange(1, slices):
- *                             bslice = (islice+b)%slices             # <<<<<<<<<<<<<<
- *                             if confs[ispin, bslice] == k:
- *                                 ediff = 0.0
+                  /* "solvers/qmc.pyx":1571
+ *                         while True:
+ *                             ispin = cluster[cluster_count, 0]
+ *                             islice = cluster[cluster_count, 1]             # <<<<<<<<<<<<<<
+ *                             # add energy
+ *                             # loop through the neighbors
  */
-                  __pyx_t_34 = (__pyx_v_islice + __pyx_v_b);
-                  if (unlikely(__pyx_v_slices == 0)) {
-                    #ifdef WITH_THREAD
-                    PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-                    #endif
-                    PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-                    #ifdef WITH_THREAD
-                    __Pyx_PyGILState_Release(__pyx_gilstate_save);
-                    #endif
-                    __PYX_ERR(0, 1621, __pyx_L4_error)
-                  }
-                  __pyx_v_bslice = __Pyx_mod_int(__pyx_t_34, __pyx_v_slices);
+                  __pyx_t_42 = __pyx_v_cluster_count;
+                  __pyx_t_43 = 1;
+                  __pyx_v_islice = (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_42, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_43, __pyx_pybuffernd_cluster.diminfo[1].strides));
 
-                  /* "solvers/qmc.pyx":1622
- *                         for b in xrange(1, slices):
- *                             bslice = (islice+b)%slices
- *                             if confs[ispin, bslice] == k:             # <<<<<<<<<<<<<<
- *                                 ediff = 0.0
- *                                 # ediff += -2.0*teff*lookuptable[b-1]
+                  /* "solvers/qmc.pyx":1574
+ *                             # add energy
+ *                             # loop through the neighbors
+ *                             for si in xrange(maxnb):             # <<<<<<<<<<<<<<
+ *                                 # get the neighbor spin index
+ *                                 spinidx = int(nbs[ispin, si, 0])
  */
-                  __pyx_t_98 = __pyx_v_ispin;
-                  __pyx_t_99 = __pyx_v_bslice;
-                  __pyx_t_43 = (((*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_98 * __pyx_v_confs.strides[0]) ) + __pyx_t_99 * __pyx_v_confs.strides[1]) ))) == __pyx_v_k) != 0);
-                  if (__pyx_t_43) {
+                  __pyx_t_44 = __pyx_v_maxnb;
+                  __pyx_t_45 = __pyx_t_44;
+                  for (__pyx_t_46 = 0; __pyx_t_46 < __pyx_t_45; __pyx_t_46+=1) {
+                    __pyx_v_si = __pyx_t_46;
 
-                    /* "solvers/qmc.pyx":1623
- *                             bslice = (islice+b)%slices
- *                             if confs[ispin, bslice] == k:
- *                                 ediff = 0.0             # <<<<<<<<<<<<<<
- *                                 # ediff += -2.0*teff*lookuptable[b-1]
- *                                 # add bias energy
+                    /* "solvers/qmc.pyx":1576
+ *                             for si in xrange(maxnb):
+ *                                 # get the neighbor spin index
+ *                                 spinidx = int(nbs[ispin, si, 0])             # <<<<<<<<<<<<<<
+ *                                 # get the coupling value to that neighbor
+ *                                 jval = nbs[ispin, si, 1]
  */
-                    __pyx_v_ediff = 0.0;
+                    __pyx_t_47 = __pyx_v_ispin;
+                    __pyx_t_48 = __pyx_v_si;
+                    __pyx_t_49 = 0;
+                    __pyx_v_spinidx = ((int)(*((__pyx_t_5numpy_float_t *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_nbs.data + __pyx_t_47 * __pyx_v_nbs.strides[0]) ) + __pyx_t_48 * __pyx_v_nbs.strides[1]) ) + __pyx_t_49 * __pyx_v_nbs.strides[2]) ))));
 
-                    /* "solvers/qmc.pyx":1626
- *                                 # ediff += -2.0*teff*lookuptable[b-1]
- *                                 # add bias energy
- *                                 for si2 in xrange(maxnb):             # <<<<<<<<<<<<<<
- *                                     spinidx2 = int(nbs[ispin, si2, 0])
- *                                     if ispin == spinidx2:
+                    /* "solvers/qmc.pyx":1578
+ *                                 spinidx = int(nbs[ispin, si, 0])
+ *                                 # get the coupling value to that neighbor
+ *                                 jval = nbs[ispin, si, 1]             # <<<<<<<<<<<<<<
+ *                                 # self-connections are not quadratic
+ *                                 if spinidx == ispin:
  */
-                    __pyx_t_34 = __pyx_v_maxnb;
-                    __pyx_t_35 = __pyx_t_34;
-                    for (__pyx_t_36 = 0; __pyx_t_36 < __pyx_t_35; __pyx_t_36+=1) {
-                      __pyx_v_si2 = __pyx_t_36;
+                    __pyx_t_50 = __pyx_v_ispin;
+                    __pyx_t_51 = __pyx_v_si;
+                    __pyx_t_52 = 1;
+                    __pyx_v_jval = (*((__pyx_t_5numpy_float_t *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_nbs.data + __pyx_t_50 * __pyx_v_nbs.strides[0]) ) + __pyx_t_51 * __pyx_v_nbs.strides[1]) ) + __pyx_t_52 * __pyx_v_nbs.strides[2]) )));
 
-                      /* "solvers/qmc.pyx":1627
- *                                 # add bias energy
- *                                 for si2 in xrange(maxnb):
- *                                     spinidx2 = int(nbs[ispin, si2, 0])             # <<<<<<<<<<<<<<
- *                                     if ispin == spinidx2:
- *                                         ediff += -2.0*b_coeff*nbs[ispin, si2, 1]*k
- */
-                      __pyx_t_100 = __pyx_v_ispin;
-                      __pyx_t_101 = __pyx_v_si2;
-                      __pyx_t_102 = 0;
-                      __pyx_v_spinidx2 = ((int)(*((__pyx_t_5numpy_float_t *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_nbs.data + __pyx_t_100 * __pyx_v_nbs.strides[0]) ) + __pyx_t_101 * __pyx_v_nbs.strides[1]) ) + __pyx_t_102 * __pyx_v_nbs.strides[2]) ))));
-
-                      /* "solvers/qmc.pyx":1628
- *                                 for si2 in xrange(maxnb):
- *                                     spinidx2 = int(nbs[ispin, si2, 0])
- *                                     if ispin == spinidx2:             # <<<<<<<<<<<<<<
- *                                         ediff += -2.0*b_coeff*nbs[ispin, si2, 1]*k
- *                                     else:
- */
-                      __pyx_t_43 = ((__pyx_v_ispin == __pyx_v_spinidx2) != 0);
-                      if (__pyx_t_43) {
-
-                        /* "solvers/qmc.pyx":1629
- *                                     spinidx2 = int(nbs[ispin, si2, 0])
- *                                     if ispin == spinidx2:
- *                                         ediff += -2.0*b_coeff*nbs[ispin, si2, 1]*k             # <<<<<<<<<<<<<<
- *                                     else:
- *                                         ediff += -2.0*b_coeff*jval*k*confs[spinidx2, bslice]
- */
-                        __pyx_t_103 = __pyx_v_ispin;
-                        __pyx_t_104 = __pyx_v_si2;
-                        __pyx_t_105 = 1;
-                        __pyx_v_ediff = (__pyx_v_ediff + (((-2.0 * __pyx_v_b_coeff) * (*((__pyx_t_5numpy_float_t *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_nbs.data + __pyx_t_103 * __pyx_v_nbs.strides[0]) ) + __pyx_t_104 * __pyx_v_nbs.strides[1]) ) + __pyx_t_105 * __pyx_v_nbs.strides[2]) )))) * __pyx_v_k));
-
-                        /* "solvers/qmc.pyx":1628
- *                                 for si2 in xrange(maxnb):
- *                                     spinidx2 = int(nbs[ispin, si2, 0])
- *                                     if ispin == spinidx2:             # <<<<<<<<<<<<<<
- *                                         ediff += -2.0*b_coeff*nbs[ispin, si2, 1]*k
- *                                     else:
- */
-                        goto __pyx_L38;
-                      }
-
-                      /* "solvers/qmc.pyx":1631
- *                                         ediff += -2.0*b_coeff*nbs[ispin, si2, 1]*k
- *                                     else:
- *                                         ediff += -2.0*b_coeff*jval*k*confs[spinidx2, bslice]             # <<<<<<<<<<<<<<
- *                                 if bslice == 0:
- *                                     tleft2 = slices - 1
- */
-                      /*else*/ {
-                        __pyx_t_106 = __pyx_v_spinidx2;
-                        __pyx_t_107 = __pyx_v_bslice;
-                        __pyx_v_ediff = (__pyx_v_ediff + ((((-2.0 * __pyx_v_b_coeff) * __pyx_v_jval) * __pyx_v_k) * (*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_106 * __pyx_v_confs.strides[0]) ) + __pyx_t_107 * __pyx_v_confs.strides[1]) )))));
-                      }
-                      __pyx_L38:;
-                    }
-
-                    /* "solvers/qmc.pyx":1632
- *                                     else:
- *                                         ediff += -2.0*b_coeff*jval*k*confs[spinidx2, bslice]
- *                                 if bslice == 0:             # <<<<<<<<<<<<<<
- *                                     tleft2 = slices - 1
- *                                     tright2 = 1
- */
-                    __pyx_t_43 = ((__pyx_v_bslice == 0) != 0);
-                    if (__pyx_t_43) {
-
-                      /* "solvers/qmc.pyx":1633
- *                                         ediff += -2.0*b_coeff*jval*k*confs[spinidx2, bslice]
- *                                 if bslice == 0:
- *                                     tleft2 = slices - 1             # <<<<<<<<<<<<<<
- *                                     tright2 = 1
- *                                 elif bslice == slices - 1:
- */
-                      __pyx_v_tleft2 = (__pyx_v_slices - 1);
-
-                      /* "solvers/qmc.pyx":1634
- *                                 if bslice == 0:
- *                                     tleft2 = slices - 1
- *                                     tright2 = 1             # <<<<<<<<<<<<<<
- *                                 elif bslice == slices - 1:
- *                                     tleft2 = slices - 2
- */
-                      __pyx_v_tright2 = 1;
-
-                      /* "solvers/qmc.pyx":1632
- *                                     else:
- *                                         ediff += -2.0*b_coeff*jval*k*confs[spinidx2, bslice]
- *                                 if bslice == 0:             # <<<<<<<<<<<<<<
- *                                     tleft2 = slices - 1
- *                                     tright2 = 1
- */
-                      goto __pyx_L39;
-                    }
-
-                    /* "solvers/qmc.pyx":1635
- *                                     tleft2 = slices - 1
- *                                     tright2 = 1
- *                                 elif bslice == slices - 1:             # <<<<<<<<<<<<<<
- *                                     tleft2 = slices - 2
- *                                     tright2 = 0
- */
-                    __pyx_t_43 = ((__pyx_v_bslice == (__pyx_v_slices - 1)) != 0);
-                    if (__pyx_t_43) {
-
-                      /* "solvers/qmc.pyx":1636
- *                                     tright2 = 1
- *                                 elif bslice == slices - 1:
- *                                     tleft2 = slices - 2             # <<<<<<<<<<<<<<
- *                                     tright2 = 0
+                    /* "solvers/qmc.pyx":1580
+ *                                 jval = nbs[ispin, si, 1]
+ *                                 # self-connections are not quadratic
+ *                                 if spinidx == ispin:             # <<<<<<<<<<<<<<
+ *                                     e_total += -2.0*b_coeff*float(k)*jval
  *                                 else:
  */
-                      __pyx_v_tleft2 = (__pyx_v_slices - 2);
+                    __pyx_t_53 = ((__pyx_v_spinidx == __pyx_v_ispin) != 0);
+                    if (__pyx_t_53) {
 
-                      /* "solvers/qmc.pyx":1637
- *                                 elif bslice == slices - 1:
- *                                     tleft2 = slices - 2
- *                                     tright2 = 0             # <<<<<<<<<<<<<<
+                      /* "solvers/qmc.pyx":1581
+ *                                 # self-connections are not quadratic
+ *                                 if spinidx == ispin:
+ *                                     e_total += -2.0*b_coeff*float(k)*jval             # <<<<<<<<<<<<<<
  *                                 else:
- *                                     tleft2 = bslice - 1
+ *                                     e_total += -2.0*b_coeff*float(k)*(
  */
-                      __pyx_v_tright2 = 0;
+                      __pyx_v_e_total = (__pyx_v_e_total + (((-2.0 * __pyx_v_b_coeff) * ((double)__pyx_v_k)) * __pyx_v_jval));
 
-                      /* "solvers/qmc.pyx":1635
- *                                     tleft2 = slices - 1
- *                                     tright2 = 1
- *                                 elif bslice == slices - 1:             # <<<<<<<<<<<<<<
- *                                     tleft2 = slices - 2
- *                                     tright2 = 0
+                      /* "solvers/qmc.pyx":1580
+ *                                 jval = nbs[ispin, si, 1]
+ *                                 # self-connections are not quadratic
+ *                                 if spinidx == ispin:             # <<<<<<<<<<<<<<
+ *                                     e_total += -2.0*b_coeff*float(k)*jval
+ *                                 else:
  */
-                      goto __pyx_L39;
+                      goto __pyx_L22;
                     }
 
-                    /* "solvers/qmc.pyx":1639
- *                                     tright2 = 0
+                    /* "solvers/qmc.pyx":1583
+ *                                     e_total += -2.0*b_coeff*float(k)*jval
  *                                 else:
- *                                     tleft2 = bslice - 1             # <<<<<<<<<<<<<<
- *                                     tright2 = bslice + 1
- *                                 ediff += 2.0*jperp*k*confs[ispin, tleft2]
+ *                                     e_total += -2.0*b_coeff*float(k)*(             # <<<<<<<<<<<<<<
+ *                                         jval*float(confs[spinidx, islice])
+ *                                     )
  */
                     /*else*/ {
-                      __pyx_v_tleft2 = (__pyx_v_bslice - 1);
 
-                      /* "solvers/qmc.pyx":1640
+                      /* "solvers/qmc.pyx":1584
  *                                 else:
- *                                     tleft2 = bslice - 1
- *                                     tright2 = bslice + 1             # <<<<<<<<<<<<<<
- *                                 ediff += 2.0*jperp*k*confs[ispin, tleft2]
- *                                 ediff += 2.0*jperp*k*confs[ispin, tright2]
+ *                                     e_total += -2.0*b_coeff*float(k)*(
+ *                                         jval*float(confs[spinidx, islice])             # <<<<<<<<<<<<<<
+ *                                     )
+ *                             # periodic boundaries
  */
-                      __pyx_v_tright2 = (__pyx_v_bslice + 1);
+                      __pyx_t_54 = __pyx_v_spinidx;
+                      __pyx_t_55 = __pyx_v_islice;
+
+                      /* "solvers/qmc.pyx":1583
+ *                                     e_total += -2.0*b_coeff*float(k)*jval
+ *                                 else:
+ *                                     e_total += -2.0*b_coeff*float(k)*(             # <<<<<<<<<<<<<<
+ *                                         jval*float(confs[spinidx, islice])
+ *                                     )
+ */
+                      __pyx_v_e_total = (__pyx_v_e_total + (((-2.0 * __pyx_v_b_coeff) * ((double)__pyx_v_k)) * (__pyx_v_jval * ((double)(*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_54 * __pyx_v_confs.strides[0]) ) + __pyx_t_55 * __pyx_v_confs.strides[1]) )))))));
                     }
-                    __pyx_L39:;
+                    __pyx_L22:;
+                  }
 
-                    /* "solvers/qmc.pyx":1641
- *                                     tleft2 = bslice - 1
- *                                     tright2 = bslice + 1
- *                                 ediff += 2.0*jperp*k*confs[ispin, tleft2]             # <<<<<<<<<<<<<<
- *                                 ediff += 2.0*jperp*k*confs[ispin, tright2]
- *                                 # system bath coupling
+                  /* "solvers/qmc.pyx":1587
+ *                                     )
+ *                             # periodic boundaries
+ *                             if islice == 0:             # <<<<<<<<<<<<<<
+ *                                 tleft = slices-1
+ *                                 tright = 1
  */
-                    __pyx_t_108 = __pyx_v_ispin;
-                    __pyx_t_109 = __pyx_v_tleft2;
-                    __pyx_v_ediff = (__pyx_v_ediff + (((2.0 * __pyx_v_jperp) * __pyx_v_k) * (*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_108 * __pyx_v_confs.strides[0]) ) + __pyx_t_109 * __pyx_v_confs.strides[1]) )))));
+                  __pyx_t_53 = ((__pyx_v_islice == 0) != 0);
+                  if (__pyx_t_53) {
 
-                    /* "solvers/qmc.pyx":1642
- *                                     tright2 = bslice + 1
- *                                 ediff += 2.0*jperp*k*confs[ispin, tleft2]
- *                                 ediff += 2.0*jperp*k*confs[ispin, tright2]             # <<<<<<<<<<<<<<
- *                                 # system bath coupling
- *                                 for b2 in xrange(1, slices):
+                    /* "solvers/qmc.pyx":1588
+ *                             # periodic boundaries
+ *                             if islice == 0:
+ *                                 tleft = slices-1             # <<<<<<<<<<<<<<
+ *                                 tright = 1
+ *                             elif islice == slices-1:
  */
-                    __pyx_t_110 = __pyx_v_ispin;
-                    __pyx_t_111 = __pyx_v_tright2;
-                    __pyx_v_ediff = (__pyx_v_ediff + (((2.0 * __pyx_v_jperp) * __pyx_v_k) * (*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_110 * __pyx_v_confs.strides[0]) ) + __pyx_t_111 * __pyx_v_confs.strides[1]) )))));
+                    __pyx_v_tleft = (__pyx_v_slices - 1);
 
-                    /* "solvers/qmc.pyx":1644
- *                                 ediff += 2.0*jperp*k*confs[ispin, tright2]
- *                                 # system bath coupling
- *                                 for b2 in xrange(1, slices):             # <<<<<<<<<<<<<<
- *                                     cslice = (bslice+b2)%slices
- *                                     ediff += 2.0*teff*float(k*confs[
+                    /* "solvers/qmc.pyx":1589
+ *                             if islice == 0:
+ *                                 tleft = slices-1
+ *                                 tright = 1             # <<<<<<<<<<<<<<
+ *                             elif islice == slices-1:
+ *                                 tleft = slices-2
  */
-                    __pyx_t_34 = __pyx_v_slices;
-                    __pyx_t_35 = __pyx_t_34;
-                    for (__pyx_t_36 = 1; __pyx_t_36 < __pyx_t_35; __pyx_t_36+=1) {
-                      __pyx_v_b2 = __pyx_t_36;
+                    __pyx_v_tright = 1;
 
-                      /* "solvers/qmc.pyx":1645
- *                                 # system bath coupling
- *                                 for b2 in xrange(1, slices):
- *                                     cslice = (bslice+b2)%slices             # <<<<<<<<<<<<<<
- *                                     ediff += 2.0*teff*float(k*confs[
- *                                         ispin, cslice])*lookuptable[b2-1]
+                    /* "solvers/qmc.pyx":1587
+ *                                     )
+ *                             # periodic boundaries
+ *                             if islice == 0:             # <<<<<<<<<<<<<<
+ *                                 tleft = slices-1
+ *                                 tright = 1
  */
-                      __pyx_t_66 = (__pyx_v_bslice + __pyx_v_b2);
-                      if (unlikely(__pyx_v_slices == 0)) {
-                        #ifdef WITH_THREAD
-                        PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-                        #endif
-                        PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-                        #ifdef WITH_THREAD
-                        __Pyx_PyGILState_Release(__pyx_gilstate_save);
-                        #endif
-                        __PYX_ERR(0, 1645, __pyx_L4_error)
-                      }
-                      __pyx_v_cslice = __Pyx_mod_int(__pyx_t_66, __pyx_v_slices);
+                    goto __pyx_L23;
+                  }
 
-                      /* "solvers/qmc.pyx":1646
- *                                 for b2 in xrange(1, slices):
- *                                     cslice = (bslice+b2)%slices
- *                                     ediff += 2.0*teff*float(k*confs[             # <<<<<<<<<<<<<<
- *                                         ispin, cslice])*lookuptable[b2-1]
- *                                 if ediff < 0:
+                  /* "solvers/qmc.pyx":1590
+ *                                 tleft = slices-1
+ *                                 tright = 1
+ *                             elif islice == slices-1:             # <<<<<<<<<<<<<<
+ *                                 tleft = slices-2
+ *                                 tright = 0
  */
-                      __pyx_t_112 = __pyx_v_ispin;
-                      __pyx_t_113 = __pyx_v_cslice;
+                  __pyx_t_53 = ((__pyx_v_islice == (__pyx_v_slices - 1)) != 0);
+                  if (__pyx_t_53) {
 
-                      /* "solvers/qmc.pyx":1647
- *                                     cslice = (bslice+b2)%slices
- *                                     ediff += 2.0*teff*float(k*confs[
- *                                         ispin, cslice])*lookuptable[b2-1]             # <<<<<<<<<<<<<<
- *                                 if ediff < 0:
- *                                     p = 1 - cexp(ediff/teff)
+                    /* "solvers/qmc.pyx":1591
+ *                                 tright = 1
+ *                             elif islice == slices-1:
+ *                                 tleft = slices-2             # <<<<<<<<<<<<<<
+ *                                 tright = 0
+ *                             else:
  */
-                      __pyx_t_114 = (__pyx_v_b2 - 1);
+                    __pyx_v_tleft = (__pyx_v_slices - 2);
 
-                      /* "solvers/qmc.pyx":1646
- *                                 for b2 in xrange(1, slices):
- *                                     cslice = (bslice+b2)%slices
- *                                     ediff += 2.0*teff*float(k*confs[             # <<<<<<<<<<<<<<
- *                                         ispin, cslice])*lookuptable[b2-1]
- *                                 if ediff < 0:
+                    /* "solvers/qmc.pyx":1592
+ *                             elif islice == slices-1:
+ *                                 tleft = slices-2
+ *                                 tright = 0             # <<<<<<<<<<<<<<
+ *                             else:
+ *                                 tleft = islice-1
  */
-                      __pyx_v_ediff = (__pyx_v_ediff + (((2.0 * __pyx_v_teff) * ((double)(__pyx_v_k * (*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_112 * __pyx_v_confs.strides[0]) ) + __pyx_t_113 * __pyx_v_confs.strides[1]) )))))) * (*((__pyx_t_5numpy_float_t *) ( /* dim=0 */ (__pyx_v_lookuptable.data + __pyx_t_114 * __pyx_v_lookuptable.strides[0]) )))));
+                    __pyx_v_tright = 0;
+
+                    /* "solvers/qmc.pyx":1590
+ *                                 tleft = slices-1
+ *                                 tright = 1
+ *                             elif islice == slices-1:             # <<<<<<<<<<<<<<
+ *                                 tleft = slices-2
+ *                                 tright = 0
+ */
+                    goto __pyx_L23;
+                  }
+
+                  /* "solvers/qmc.pyx":1594
+ *                                 tright = 0
+ *                             else:
+ *                                 tleft = islice-1             # <<<<<<<<<<<<<<
+ *                                 tright = islice+1
+ *                             # now calculate between neighboring slices
+ */
+                  /*else*/ {
+                    __pyx_v_tleft = (__pyx_v_islice - 1);
+
+                    /* "solvers/qmc.pyx":1595
+ *                             else:
+ *                                 tleft = islice-1
+ *                                 tright = islice+1             # <<<<<<<<<<<<<<
+ *                             # now calculate between neighboring slices
+ *                             e_total += 2.0*float(k)*(jperp*float(confs[ispin, tleft]))
+ */
+                    __pyx_v_tright = (__pyx_v_islice + 1);
+                  }
+                  __pyx_L23:;
+
+                  /* "solvers/qmc.pyx":1597
+ *                                 tright = islice+1
+ *                             # now calculate between neighboring slices
+ *                             e_total += 2.0*float(k)*(jperp*float(confs[ispin, tleft]))             # <<<<<<<<<<<<<<
+ *                             e_total += 2.0*float(k)*(jperp*float(confs[ispin, tright]))
+ *                             # system bath coupling
+ */
+                  __pyx_t_56 = __pyx_v_ispin;
+                  __pyx_t_57 = __pyx_v_tleft;
+                  __pyx_v_e_total = (__pyx_v_e_total + ((2.0 * ((double)__pyx_v_k)) * (__pyx_v_jperp * ((double)(*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_56 * __pyx_v_confs.strides[0]) ) + __pyx_t_57 * __pyx_v_confs.strides[1]) )))))));
+
+                  /* "solvers/qmc.pyx":1598
+ *                             # now calculate between neighboring slices
+ *                             e_total += 2.0*float(k)*(jperp*float(confs[ispin, tleft]))
+ *                             e_total += 2.0*float(k)*(jperp*float(confs[ispin, tright]))             # <<<<<<<<<<<<<<
+ *                             # system bath coupling
+ *                             for b in xrange(1, slices):
+ */
+                  __pyx_t_58 = __pyx_v_ispin;
+                  __pyx_t_59 = __pyx_v_tright;
+                  __pyx_v_e_total = (__pyx_v_e_total + ((2.0 * ((double)__pyx_v_k)) * (__pyx_v_jperp * ((double)(*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_58 * __pyx_v_confs.strides[0]) ) + __pyx_t_59 * __pyx_v_confs.strides[1]) )))))));
+
+                  /* "solvers/qmc.pyx":1600
+ *                             e_total += 2.0*float(k)*(jperp*float(confs[ispin, tright]))
+ *                             # system bath coupling
+ *                             for b in xrange(1, slices):             # <<<<<<<<<<<<<<
+ *                                 bslice = (islice+b)%slices
+ *                                 # e_total += 2.0*teff*float(k*confs[ispin, bslice])*lookuptable[b-1]
+ */
+                  __pyx_t_44 = __pyx_v_slices;
+                  __pyx_t_45 = __pyx_t_44;
+                  for (__pyx_t_46 = 1; __pyx_t_46 < __pyx_t_45; __pyx_t_46+=1) {
+                    __pyx_v_b = __pyx_t_46;
+
+                    /* "solvers/qmc.pyx":1601
+ *                             # system bath coupling
+ *                             for b in xrange(1, slices):
+ *                                 bslice = (islice+b)%slices             # <<<<<<<<<<<<<<
+ *                                 # e_total += 2.0*teff*float(k*confs[ispin, bslice])*lookuptable[b-1]
+ *                                 if confs[ispin, bslice] == k:
+ */
+                    __pyx_t_60 = (__pyx_v_islice + __pyx_v_b);
+                    if (unlikely(__pyx_v_slices == 0)) {
+                      #ifdef WITH_THREAD
+                      PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
+                      #endif
+                      PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
+                      #ifdef WITH_THREAD
+                      __Pyx_PyGILState_Release(__pyx_gilstate_save);
+                      #endif
+                      __PYX_ERR(0, 1601, __pyx_L4_error)
                     }
+                    __pyx_v_bslice = __Pyx_mod_int(__pyx_t_60, __pyx_v_slices);
 
-                    /* "solvers/qmc.pyx":1648
- *                                     ediff += 2.0*teff*float(k*confs[
- *                                         ispin, cslice])*lookuptable[b2-1]
- *                                 if ediff < 0:             # <<<<<<<<<<<<<<
- *                                     p = 1 - cexp(ediff/teff)
+                    /* "solvers/qmc.pyx":1603
+ *                                 bslice = (islice+b)%slices
+ *                                 # e_total += 2.0*teff*float(k*confs[ispin, bslice])*lookuptable[b-1]
+ *                                 if confs[ispin, bslice] == k:             # <<<<<<<<<<<<<<
+ *                                     p = 1 - cexp(-2.0*lookuptable[b-1])
  *                                     if r*p > crand()/float(RAND_MAX):
  */
-                    __pyx_t_43 = ((__pyx_v_ediff < 0.0) != 0);
-                    if (__pyx_t_43) {
+                    __pyx_t_61 = __pyx_v_ispin;
+                    __pyx_t_62 = __pyx_v_bslice;
+                    __pyx_t_53 = (((*((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_61 * __pyx_v_confs.strides[0]) ) + __pyx_t_62 * __pyx_v_confs.strides[1]) ))) == __pyx_v_k) != 0);
+                    if (__pyx_t_53) {
 
-                      /* "solvers/qmc.pyx":1649
- *                                         ispin, cslice])*lookuptable[b2-1]
- *                                 if ediff < 0:
- *                                     p = 1 - cexp(ediff/teff)             # <<<<<<<<<<<<<<
+                      /* "solvers/qmc.pyx":1604
+ *                                 # e_total += 2.0*teff*float(k*confs[ispin, bslice])*lookuptable[b-1]
+ *                                 if confs[ispin, bslice] == k:
+ *                                     p = 1 - cexp(-2.0*lookuptable[b-1])             # <<<<<<<<<<<<<<
  *                                     if r*p > crand()/float(RAND_MAX):
  *                                         # add to cluster
  */
-                      if (unlikely(__pyx_v_teff == 0)) {
-                        #ifdef WITH_THREAD
-                        PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
-                        #endif
-                        PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-                        #ifdef WITH_THREAD
-                        __Pyx_PyGILState_Release(__pyx_gilstate_save);
-                        #endif
-                        __PYX_ERR(0, 1649, __pyx_L4_error)
-                      }
-                      __pyx_v_p = (1.0 - exp((__pyx_v_ediff / __pyx_v_teff)));
+                      __pyx_t_63 = (__pyx_v_b - 1);
+                      __pyx_v_p = (1.0 - exp((-2.0 * (*((__pyx_t_5numpy_float_t *) ( /* dim=0 */ (__pyx_v_lookuptable.data + __pyx_t_63 * __pyx_v_lookuptable.strides[0]) ))))));
 
-                      /* "solvers/qmc.pyx":1650
- *                                 if ediff < 0:
- *                                     p = 1 - cexp(ediff/teff)
+                      /* "solvers/qmc.pyx":1605
+ *                                 if confs[ispin, bslice] == k:
+ *                                     p = 1 - cexp(-2.0*lookuptable[b-1])
  *                                     if r*p > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
  *                                         # add to cluster
  *                                         r *= p
  */
-                      __pyx_t_34 = rand();
+                      __pyx_t_60 = rand();
                       if (unlikely(((double)RAND_MAX) == 0)) {
                         #ifdef WITH_THREAD
                         PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
@@ -19606,12 +19023,12 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
                         #ifdef WITH_THREAD
                         __Pyx_PyGILState_Release(__pyx_gilstate_save);
                         #endif
-                        __PYX_ERR(0, 1650, __pyx_L4_error)
+                        __PYX_ERR(0, 1605, __pyx_L4_error)
                       }
-                      __pyx_t_43 = (((__pyx_v_r * __pyx_v_p) > (__pyx_t_34 / ((double)RAND_MAX))) != 0);
-                      if (__pyx_t_43) {
+                      __pyx_t_53 = (((__pyx_v_r * __pyx_v_p) > (__pyx_t_60 / ((double)RAND_MAX))) != 0);
+                      if (__pyx_t_53) {
 
-                        /* "solvers/qmc.pyx":1652
+                        /* "solvers/qmc.pyx":1607
  *                                     if r*p > crand()/float(RAND_MAX):
  *                                         # add to cluster
  *                                         r *= p             # <<<<<<<<<<<<<<
@@ -19620,138 +19037,218 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
  */
                         __pyx_v_r = (__pyx_v_r * __pyx_v_p);
 
-                        /* "solvers/qmc.pyx":1653
+                        /* "solvers/qmc.pyx":1608
  *                                         # add to cluster
  *                                         r *= p
  *                                         cluster[stackidx, 0] = ispin             # <<<<<<<<<<<<<<
  *                                         cluster[stackidx, 1] = bslice
  *                                         confs[ispin, bslice] *= -1
  */
-                        __pyx_t_115 = __pyx_v_stackidx;
-                        __pyx_t_116 = 0;
-                        *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_115, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_116, __pyx_pybuffernd_cluster.diminfo[1].strides) = __pyx_v_ispin;
+                        __pyx_t_64 = __pyx_v_stackidx;
+                        __pyx_t_65 = 0;
+                        *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_64, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_65, __pyx_pybuffernd_cluster.diminfo[1].strides) = __pyx_v_ispin;
 
-                        /* "solvers/qmc.pyx":1654
+                        /* "solvers/qmc.pyx":1609
  *                                         r *= p
  *                                         cluster[stackidx, 0] = ispin
  *                                         cluster[stackidx, 1] = bslice             # <<<<<<<<<<<<<<
  *                                         confs[ispin, bslice] *= -1
  *                                         stack += 1
  */
-                        __pyx_t_117 = __pyx_v_stackidx;
-                        __pyx_t_118 = 1;
-                        *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_117, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_118, __pyx_pybuffernd_cluster.diminfo[1].strides) = __pyx_v_bslice;
+                        __pyx_t_66 = __pyx_v_stackidx;
+                        __pyx_t_67 = 1;
+                        *__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_66, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_67, __pyx_pybuffernd_cluster.diminfo[1].strides) = __pyx_v_bslice;
 
-                        /* "solvers/qmc.pyx":1655
+                        /* "solvers/qmc.pyx":1610
  *                                         cluster[stackidx, 0] = ispin
  *                                         cluster[stackidx, 1] = bslice
  *                                         confs[ispin, bslice] *= -1             # <<<<<<<<<<<<<<
  *                                         stack += 1
  *                                         stackidx += 1
  */
-                        __pyx_t_119 = __pyx_v_ispin;
-                        __pyx_t_120 = __pyx_v_bslice;
-                        *((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_119 * __pyx_v_confs.strides[0]) ) + __pyx_t_120 * __pyx_v_confs.strides[1]) )) *= -1L;
+                        __pyx_t_68 = __pyx_v_ispin;
+                        __pyx_t_69 = __pyx_v_bslice;
+                        *((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_68 * __pyx_v_confs.strides[0]) ) + __pyx_t_69 * __pyx_v_confs.strides[1]) )) *= -1L;
 
-                        /* "solvers/qmc.pyx":1656
+                        /* "solvers/qmc.pyx":1611
  *                                         cluster[stackidx, 1] = bslice
  *                                         confs[ispin, bslice] *= -1
  *                                         stack += 1             # <<<<<<<<<<<<<<
  *                                         stackidx += 1
- *                         cluster_count += 1
+ *                             cluster_count += 1
  */
                         __pyx_v_stack = (__pyx_v_stack + 1);
 
-                        /* "solvers/qmc.pyx":1657
+                        /* "solvers/qmc.pyx":1612
  *                                         confs[ispin, bslice] *= -1
  *                                         stack += 1
  *                                         stackidx += 1             # <<<<<<<<<<<<<<
- *                         cluster_count += 1
- *                         stack += -1
+ *                             cluster_count += 1
+ *                             stack += -1
  */
                         __pyx_v_stackidx = (__pyx_v_stackidx + 1);
 
-                        /* "solvers/qmc.pyx":1650
- *                                 if ediff < 0:
- *                                     p = 1 - cexp(ediff/teff)
+                        /* "solvers/qmc.pyx":1605
+ *                                 if confs[ispin, bslice] == k:
+ *                                     p = 1 - cexp(-2.0*lookuptable[b-1])
  *                                     if r*p > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
  *                                         # add to cluster
  *                                         r *= p
  */
                       }
 
-                      /* "solvers/qmc.pyx":1648
- *                                     ediff += 2.0*teff*float(k*confs[
- *                                         ispin, cslice])*lookuptable[b2-1]
- *                                 if ediff < 0:             # <<<<<<<<<<<<<<
- *                                     p = 1 - cexp(ediff/teff)
+                      /* "solvers/qmc.pyx":1603
+ *                                 bslice = (islice+b)%slices
+ *                                 # e_total += 2.0*teff*float(k*confs[ispin, bslice])*lookuptable[b-1]
+ *                                 if confs[ispin, bslice] == k:             # <<<<<<<<<<<<<<
+ *                                     p = 1 - cexp(-2.0*lookuptable[b-1])
  *                                     if r*p > crand()/float(RAND_MAX):
  */
                     }
+                  }
 
-                    /* "solvers/qmc.pyx":1622
- *                         for b in xrange(1, slices):
- *                             bslice = (islice+b)%slices
- *                             if confs[ispin, bslice] == k:             # <<<<<<<<<<<<<<
- *                                 ediff = 0.0
- *                                 # ediff += -2.0*teff*lookuptable[b-1]
+                  /* "solvers/qmc.pyx":1613
+ *                                         stack += 1
+ *                                         stackidx += 1
+ *                             cluster_count += 1             # <<<<<<<<<<<<<<
+ *                             stack += -1
+ *                             if stack == 0:
+ */
+                  __pyx_v_cluster_count = (__pyx_v_cluster_count + 1);
+
+                  /* "solvers/qmc.pyx":1614
+ *                                         stackidx += 1
+ *                             cluster_count += 1
+ *                             stack += -1             # <<<<<<<<<<<<<<
+ *                             if stack == 0:
+ *                                 break
+ */
+                  __pyx_v_stack = (__pyx_v_stack + -1L);
+
+                  /* "solvers/qmc.pyx":1615
+ *                             cluster_count += 1
+ *                             stack += -1
+ *                             if stack == 0:             # <<<<<<<<<<<<<<
+ *                                 break
+ *                         if e_total > 0.0:
+ */
+                  __pyx_t_53 = ((__pyx_v_stack == 0) != 0);
+                  if (__pyx_t_53) {
+
+                    /* "solvers/qmc.pyx":1616
+ *                             stack += -1
+ *                             if stack == 0:
+ *                                 break             # <<<<<<<<<<<<<<
+ *                         if e_total > 0.0:
+ *                             if 1 - cexp(-1.0*e_total/teff) > crand()/float(RAND_MAX):
+ */
+                    goto __pyx_L19_break;
+
+                    /* "solvers/qmc.pyx":1615
+ *                             cluster_count += 1
+ *                             stack += -1
+ *                             if stack == 0:             # <<<<<<<<<<<<<<
+ *                                 break
+ *                         if e_total > 0.0:
  */
                   }
                 }
+                __pyx_L19_break:;
 
-                /* "solvers/qmc.pyx":1658
- *                                         stack += 1
- *                                         stackidx += 1
- *                         cluster_count += 1             # <<<<<<<<<<<<<<
- *                         stack += -1
- *                         if stack == 0:
+                /* "solvers/qmc.pyx":1617
+ *                             if stack == 0:
+ *                                 break
+ *                         if e_total > 0.0:             # <<<<<<<<<<<<<<
+ *                             if 1 - cexp(-1.0*e_total/teff) > crand()/float(RAND_MAX):
+ *                                 # undo cluster move as increased system energy
  */
-                __pyx_v_cluster_count = (__pyx_v_cluster_count + 1);
+                __pyx_t_53 = ((__pyx_v_e_total > 0.0) != 0);
+                if (__pyx_t_53) {
 
-                /* "solvers/qmc.pyx":1659
- *                                         stackidx += 1
- *                         cluster_count += 1
- *                         stack += -1             # <<<<<<<<<<<<<<
- *                         if stack == 0:
- *                             break
+                  /* "solvers/qmc.pyx":1618
+ *                                 break
+ *                         if e_total > 0.0:
+ *                             if 1 - cexp(-1.0*e_total/teff) > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
+ *                                 # undo cluster move as increased system energy
+ *                                 for stackidx in xrange(cluster_count):
  */
-                __pyx_v_stack = (__pyx_v_stack + -1L);
+                  __pyx_t_5 = (-1.0 * __pyx_v_e_total);
+                  if (unlikely(__pyx_v_teff == 0)) {
+                    #ifdef WITH_THREAD
+                    PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
+                    #endif
+                    PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+                    #ifdef WITH_THREAD
+                    __Pyx_PyGILState_Release(__pyx_gilstate_save);
+                    #endif
+                    __PYX_ERR(0, 1618, __pyx_L4_error)
+                  }
+                  __pyx_t_44 = rand();
+                  if (unlikely(((double)RAND_MAX) == 0)) {
+                    #ifdef WITH_THREAD
+                    PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
+                    #endif
+                    PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+                    #ifdef WITH_THREAD
+                    __Pyx_PyGILState_Release(__pyx_gilstate_save);
+                    #endif
+                    __PYX_ERR(0, 1618, __pyx_L4_error)
+                  }
+                  __pyx_t_53 = (((1.0 - exp((__pyx_t_5 / __pyx_v_teff))) > (__pyx_t_44 / ((double)RAND_MAX))) != 0);
+                  if (__pyx_t_53) {
 
-                /* "solvers/qmc.pyx":1660
- *                         cluster_count += 1
- *                         stack += -1
- *                         if stack == 0:             # <<<<<<<<<<<<<<
- *                             break
+                    /* "solvers/qmc.pyx":1620
+ *                             if 1 - cexp(-1.0*e_total/teff) > crand()/float(RAND_MAX):
+ *                                 # undo cluster move as increased system energy
+ *                                 for stackidx in xrange(cluster_count):             # <<<<<<<<<<<<<<
+ *                                     confs[cluster[stackidx, 0], cluster[stackidx, 1]] *= -1
  * 
  */
-                __pyx_t_43 = ((__pyx_v_stack == 0) != 0);
-                if (__pyx_t_43) {
+                    __pyx_t_44 = __pyx_v_cluster_count;
+                    __pyx_t_45 = __pyx_t_44;
+                    for (__pyx_t_46 = 0; __pyx_t_46 < __pyx_t_45; __pyx_t_46+=1) {
+                      __pyx_v_stackidx = __pyx_t_46;
 
-                  /* "solvers/qmc.pyx":1661
- *                         stack += -1
- *                         if stack == 0:
- *                             break             # <<<<<<<<<<<<<<
+                      /* "solvers/qmc.pyx":1621
+ *                                 # undo cluster move as increased system energy
+ *                                 for stackidx in xrange(cluster_count):
+ *                                     confs[cluster[stackidx, 0], cluster[stackidx, 1]] *= -1             # <<<<<<<<<<<<<<
  * 
  */
-                  goto __pyx_L32_break;
+                      __pyx_t_70 = __pyx_v_stackidx;
+                      __pyx_t_71 = 0;
+                      __pyx_t_72 = __pyx_v_stackidx;
+                      __pyx_t_73 = 1;
+                      __pyx_t_74 = (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_70, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_71, __pyx_pybuffernd_cluster.diminfo[1].strides));
+                      __pyx_t_75 = (*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cluster.rcbuffer->pybuffer.buf, __pyx_t_72, __pyx_pybuffernd_cluster.diminfo[0].strides, __pyx_t_73, __pyx_pybuffernd_cluster.diminfo[1].strides));
+                      *((__pyx_t_5numpy_int_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_confs.data + __pyx_t_74 * __pyx_v_confs.strides[0]) ) + __pyx_t_75 * __pyx_v_confs.strides[1]) )) *= -1L;
+                    }
 
-                  /* "solvers/qmc.pyx":1660
- *                         cluster_count += 1
- *                         stack += -1
- *                         if stack == 0:             # <<<<<<<<<<<<<<
- *                             break
- * 
+                    /* "solvers/qmc.pyx":1618
+ *                                 break
+ *                         if e_total > 0.0:
+ *                             if 1 - cexp(-1.0*e_total/teff) > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
+ *                                 # undo cluster move as increased system energy
+ *                                 for stackidx in xrange(cluster_count):
+ */
+                  }
+
+                  /* "solvers/qmc.pyx":1617
+ *                             if stack == 0:
+ *                                 break
+ *                         if e_total > 0.0:             # <<<<<<<<<<<<<<
+ *                             if 1 - cexp(-1.0*e_total/teff) > crand()/float(RAND_MAX):
+ *                                 # undo cluster move as increased system energy
  */
                 }
               }
-              __pyx_L32_break:;
             }
           }
         }
       }
 
-      /* "solvers/qmc.pyx":1540
- *     cdef int tright2 = 0
+      /* "solvers/qmc.pyx":1541
+ *     cdef double e_total = 0.0
  * 
  *     with nogil:             # <<<<<<<<<<<<<<
  *         for ifield in xrange(schedsize):
@@ -19779,7 +19276,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
   /* "solvers/qmc.pyx":1452
  * @cython.wraparound(False)
  * @cython.embedsignature(True)
- * cpdef DissipativeQuantumAnnealWC2(np.float_t[:] A_sched,             # <<<<<<<<<<<<<<
+ * cpdef DissipativeQuantumAnnealWC3(np.float_t[:] A_sched,             # <<<<<<<<<<<<<<
  *                              np.float_t[:] B_sched,
  *                              int mcsteps,
  */
@@ -19802,7 +19299,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_ediffs.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_ispins.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("solvers.qmc.DissipativeQuantumAnnealWC2", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("solvers.qmc.DissipativeQuantumAnnealWC3", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   goto __pyx_L2;
   __pyx_L0:;
@@ -19819,9 +19316,9 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7solvers_3qmc_17DissipativeQuantumAnnealWC2(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_7solvers_3qmc_16DissipativeQuantumAnnealWC2[] = "DissipativeQuantumAnnealWC2(float_t[:] A_sched, float_t[:] B_sched, int mcsteps, float temp, float_t[:] lookuptable, int_t[:, :] confs, float_t[:, :, :] nbs, int nthreads)\nDissipativeQuantumAnnealWC2(float_t[:] A_sched, float_t[:] B_sched, int mcsteps, float temp, float_t[:] lookuptable, int_t[:, :] confs, float_t[:, :, :] nbs, int nthreads)\n\n    Execute quantum annealing part using path-integral quantum Monte Carlo.\n    This implementation includes local and global updates.\n    The Hamiltonian is:\n\n    H = \\sum_k^P(\\sum_ij J_ij s^k_i s^k_j + J_perp \\sum_i s^k_i s^k+1_i ) +\n        alpha \\sum_i^N (\\sum_k^P (\\sum_k'^P s^k_i s^k'_i * (pi / (P*sin(pi * |k - k'|/P))^2)))\n\n    where J_perp = -PT/2 log(tanh(G/PT)).\n    The quantum annealing is controlled by the strength of the transverse\n    field. This is given as an array of field values in @A_sched. @confs\n    stores the spin configurations for each replica which are updated\n    sequentially.\n\n    Args:\n        @A_sched (np.array, float): an array of transverse field coefficients that specify\n                                  the annealing schedule\n        @B_sched (np.array, float): an array of longitudinal field coefficients that specify\n                                  the annealing schedule\n        @mcsteps (int): number of sweeps to do on each annealing step\n        @slices (int): number of replicas\n        @temp (float): ambient temperature\n        @nspins (int): number of spins in the spacial dimension\n        @confs (np.ndarray, float): contains the starting configurations\n                                    for all Trotter replicas\n        @nbs (np.ndarray, float): 3D array whose 1st dimension indexes\n                                  each spin, 2nd dimension indexes\n                                  neighbors to some spin, and 3rd\n                                  dimension indexes the spin index\n                                  of that neighbor (first element)\n        ""                          or the coupling value to that\n                                  neighbor (second element). See\n                                  tools.GenerateNeighbors().\n        @nthreads (int): number of parallel threads to use\n\n    Returns:\n        None: spins are flipped in-place within @confs\n    ";
-static PyObject *__pyx_pw_7solvers_3qmc_17DissipativeQuantumAnnealWC2(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7solvers_3qmc_17DissipativeQuantumAnnealWC3(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_7solvers_3qmc_16DissipativeQuantumAnnealWC3[] = "DissipativeQuantumAnnealWC3(float_t[:] A_sched, float_t[:] B_sched, int mcsteps, float temp, float_t[:] lookuptable, int_t[:, :] confs, float_t[:, :, :] nbs, int nthreads)\n\n    Execute quantum annealing part using path-integral quantum Monte Carlo.\n    This implementation includes local and global updates.\n    The Hamiltonian is:\n\n    H = \\sum_k^P(\\sum_ij J_ij s^k_i s^k_j + J_perp \\sum_i s^k_i s^k+1_i ) +\n        alpha \\sum_i^N (\\sum_k^P (\\sum_k'^P s^k_i s^k'_i * (pi / (P*sin(pi * |k - k'|/P))^2)))\n\n    where J_perp = -PT/2 log(tanh(G/PT)).\n    The quantum annealing is controlled by the strength of the transverse\n    field. This is given as an array of field values in @A_sched. @confs\n    stores the spin configurations for each replica which are updated\n    sequentially.\n\n    Args:\n        @A_sched (np.array, float): an array of transverse field coefficients that specify\n                                  the annealing schedule\n        @B_sched (np.array, float): an array of longitudinal field coefficients that specify\n                                  the annealing schedule\n        @mcsteps (int): number of sweeps to do on each annealing step\n        @slices (int): number of replicas\n        @temp (float): ambient temperature\n        @nspins (int): number of spins in the spacial dimension\n        @confs (np.ndarray, float): contains the starting configurations\n                                    for all Trotter replicas\n        @nbs (np.ndarray, float): 3D array whose 1st dimension indexes\n                                  each spin, 2nd dimension indexes\n                                  neighbors to some spin, and 3rd\n                                  dimension indexes the spin index\n                                  of that neighbor (first element)\n                                  or the coupling value to that\n                                  neighbor (second element). See\n                                  tools.GenerateNe""ighbors().\n        @nthreads (int): number of parallel threads to use\n\n    Returns:\n        None: spins are flipped in-place within @confs\n    ";
+static PyObject *__pyx_pw_7solvers_3qmc_17DissipativeQuantumAnnealWC3(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_A_sched = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_B_sched = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_v_mcsteps;
@@ -19832,7 +19329,7 @@ static PyObject *__pyx_pw_7solvers_3qmc_17DissipativeQuantumAnnealWC2(PyObject *
   int __pyx_v_nthreads;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("DissipativeQuantumAnnealWC2 (wrapper)", 0);
+  __Pyx_RefNannySetupContext("DissipativeQuantumAnnealWC3 (wrapper)", 0);
   {
     static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_A_sched,&__pyx_n_s_B_sched,&__pyx_n_s_mcsteps,&__pyx_n_s_temp,&__pyx_n_s_lookuptable,&__pyx_n_s_confs,&__pyx_n_s_nbs,&__pyx_n_s_nthreads,0};
     PyObject* values[8] = {0,0,0,0,0,0,0,0};
@@ -19868,47 +19365,47 @@ static PyObject *__pyx_pw_7solvers_3qmc_17DissipativeQuantumAnnealWC2(PyObject *
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_B_sched)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("DissipativeQuantumAnnealWC2", 1, 8, 8, 1); __PYX_ERR(0, 1452, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("DissipativeQuantumAnnealWC3", 1, 8, 8, 1); __PYX_ERR(0, 1452, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_mcsteps)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("DissipativeQuantumAnnealWC2", 1, 8, 8, 2); __PYX_ERR(0, 1452, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("DissipativeQuantumAnnealWC3", 1, 8, 8, 2); __PYX_ERR(0, 1452, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_temp)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("DissipativeQuantumAnnealWC2", 1, 8, 8, 3); __PYX_ERR(0, 1452, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("DissipativeQuantumAnnealWC3", 1, 8, 8, 3); __PYX_ERR(0, 1452, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_lookuptable)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("DissipativeQuantumAnnealWC2", 1, 8, 8, 4); __PYX_ERR(0, 1452, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("DissipativeQuantumAnnealWC3", 1, 8, 8, 4); __PYX_ERR(0, 1452, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_confs)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("DissipativeQuantumAnnealWC2", 1, 8, 8, 5); __PYX_ERR(0, 1452, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("DissipativeQuantumAnnealWC3", 1, 8, 8, 5); __PYX_ERR(0, 1452, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  6:
         if (likely((values[6] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_nbs)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("DissipativeQuantumAnnealWC2", 1, 8, 8, 6); __PYX_ERR(0, 1452, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("DissipativeQuantumAnnealWC3", 1, 8, 8, 6); __PYX_ERR(0, 1452, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  7:
         if (likely((values[7] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_nthreads)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("DissipativeQuantumAnnealWC2", 1, 8, 8, 7); __PYX_ERR(0, 1452, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("DissipativeQuantumAnnealWC3", 1, 8, 8, 7); __PYX_ERR(0, 1452, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "DissipativeQuantumAnnealWC2") < 0)) __PYX_ERR(0, 1452, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "DissipativeQuantumAnnealWC3") < 0)) __PYX_ERR(0, 1452, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 8) {
       goto __pyx_L5_argtuple_error;
@@ -19933,31 +19430,31 @@ static PyObject *__pyx_pw_7solvers_3qmc_17DissipativeQuantumAnnealWC2(PyObject *
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("DissipativeQuantumAnnealWC2", 1, 8, 8, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 1452, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("DissipativeQuantumAnnealWC3", 1, 8, 8, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 1452, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("solvers.qmc.DissipativeQuantumAnnealWC2", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("solvers.qmc.DissipativeQuantumAnnealWC3", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7solvers_3qmc_16DissipativeQuantumAnnealWC2(__pyx_self, __pyx_v_A_sched, __pyx_v_B_sched, __pyx_v_mcsteps, __pyx_v_temp, __pyx_v_lookuptable, __pyx_v_confs, __pyx_v_nbs, __pyx_v_nthreads);
+  __pyx_r = __pyx_pf_7solvers_3qmc_16DissipativeQuantumAnnealWC3(__pyx_self, __pyx_v_A_sched, __pyx_v_B_sched, __pyx_v_mcsteps, __pyx_v_temp, __pyx_v_lookuptable, __pyx_v_confs, __pyx_v_nbs, __pyx_v_nthreads);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7solvers_3qmc_16DissipativeQuantumAnnealWC2(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_A_sched, __Pyx_memviewslice __pyx_v_B_sched, int __pyx_v_mcsteps, float __pyx_v_temp, __Pyx_memviewslice __pyx_v_lookuptable, __Pyx_memviewslice __pyx_v_confs, __Pyx_memviewslice __pyx_v_nbs, int __pyx_v_nthreads) {
+static PyObject *__pyx_pf_7solvers_3qmc_16DissipativeQuantumAnnealWC3(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_A_sched, __Pyx_memviewslice __pyx_v_B_sched, int __pyx_v_mcsteps, float __pyx_v_temp, __Pyx_memviewslice __pyx_v_lookuptable, __Pyx_memviewslice __pyx_v_confs, __Pyx_memviewslice __pyx_v_nbs, int __pyx_v_nthreads) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
-  __Pyx_RefNannySetupContext("DissipativeQuantumAnnealWC2", 0);
+  __Pyx_RefNannySetupContext("DissipativeQuantumAnnealWC3", 0);
   __Pyx_XDECREF(__pyx_r);
   if (unlikely(!__pyx_v_A_sched.memview)) { __Pyx_RaiseUnboundLocalError("A_sched"); __PYX_ERR(0, 1452, __pyx_L1_error) }
   if (unlikely(!__pyx_v_B_sched.memview)) { __Pyx_RaiseUnboundLocalError("B_sched"); __PYX_ERR(0, 1452, __pyx_L1_error) }
   if (unlikely(!__pyx_v_lookuptable.memview)) { __Pyx_RaiseUnboundLocalError("lookuptable"); __PYX_ERR(0, 1452, __pyx_L1_error) }
   if (unlikely(!__pyx_v_confs.memview)) { __Pyx_RaiseUnboundLocalError("confs"); __PYX_ERR(0, 1452, __pyx_L1_error) }
   if (unlikely(!__pyx_v_nbs.memview)) { __Pyx_RaiseUnboundLocalError("nbs"); __PYX_ERR(0, 1452, __pyx_L1_error) }
-  __pyx_t_1 = __pyx_f_7solvers_3qmc_DissipativeQuantumAnnealWC2(__pyx_v_A_sched, __pyx_v_B_sched, __pyx_v_mcsteps, __pyx_v_temp, __pyx_v_lookuptable, __pyx_v_confs, __pyx_v_nbs, __pyx_v_nthreads, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1452, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_7solvers_3qmc_DissipativeQuantumAnnealWC3(__pyx_v_A_sched, __pyx_v_B_sched, __pyx_v_mcsteps, __pyx_v_temp, __pyx_v_lookuptable, __pyx_v_confs, __pyx_v_nbs, __pyx_v_nthreads, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1452, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -19966,7 +19463,7 @@ static PyObject *__pyx_pf_7solvers_3qmc_16DissipativeQuantumAnnealWC2(CYTHON_UNU
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("solvers.qmc.DissipativeQuantumAnnealWC2", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("solvers.qmc.DissipativeQuantumAnnealWC3", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __PYX_XDEC_MEMVIEW(&__pyx_v_A_sched, 1);
@@ -35944,7 +35441,7 @@ static PyMethodDef __pyx_methods[] = {
   {"DissaptiveQuantumAnnealWCL", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_7solvers_3qmc_11DissaptiveQuantumAnnealWCL, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7solvers_3qmc_10DissaptiveQuantumAnnealWCL},
   {"QuantumAnnealWC", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_7solvers_3qmc_13QuantumAnnealWC, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7solvers_3qmc_12QuantumAnnealWC},
   {"DissipativeQuantumAnnealWC2", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_7solvers_3qmc_15DissipativeQuantumAnnealWC2, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7solvers_3qmc_14DissipativeQuantumAnnealWC2},
-  {"DissipativeQuantumAnnealWC2", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_7solvers_3qmc_17DissipativeQuantumAnnealWC2, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7solvers_3qmc_16DissipativeQuantumAnnealWC2},
+  {"DissipativeQuantumAnnealWC3", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_7solvers_3qmc_17DissipativeQuantumAnnealWC3, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7solvers_3qmc_16DissipativeQuantumAnnealWC3},
   {0, 0, 0, 0}
 };
 

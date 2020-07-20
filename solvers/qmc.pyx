@@ -1449,7 +1449,7 @@ cpdef DissipativeQuantumAnnealWC2(np.float_t[:] A_sched,
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.embedsignature(True)
-cpdef DissipativeQuantumAnnealWC2(np.float_t[:] A_sched,
+cpdef DissipativeQuantumAnnealWC3(np.float_t[:] A_sched,
                              np.float_t[:] B_sched,
                              int mcsteps,
                              float temp,
@@ -1536,6 +1536,7 @@ cpdef DissipativeQuantumAnnealWC2(np.float_t[:] A_sched,
     cdef double r = 1.0
     cdef int tleft2 = 0
     cdef int tright2 = 0
+    cdef double e_total = 0.0
 
     with nogil:
         for ifield in xrange(schedsize):
@@ -1543,57 +1544,6 @@ cpdef DissipativeQuantumAnnealWC2(np.float_t[:] A_sched,
             jperp = -0.5*teff*clog(ctanh(A_sched[ifield]/teff))
             b_coeff = B_sched[ifield]
             for step in xrange(mcsteps):
-                # Loop over Trotter slices
-                for islice in xrange(slices):
-                    # Fisher-Yates shuffling algorithm
-                    for i in xrange(nspins):
-                        ispins[i] = i
-                    for i in xrange(nspins, 0, -1):
-                        j = crand() % i
-                        t = ispins[i-1]
-                        ispins[i-1] = ispins[j]
-                        ispins[j] = t
-                    # Loop over spins
-                    for sidx in xrange(nspins):
-                        ispin = ispins[sidx]
-                        ediffs[ispin, islice] = 0.0
-                        # loop through the neighbors
-                        for si in xrange(maxnb):
-                            # get the neighbor spin index
-                            spinidx = int(nbs[ispin, si, 0])
-                            # get the coupling value to that neighbor
-                            jval = nbs[ispin, si, 1]
-                            # self-connections are not quadratic
-                            if spinidx == ispin:
-                                ediffs[ispin, islice] += -2.0*b_coeff*float(confs[ispin, islice])*jval
-                            else:
-                                ediffs[ispin, islice] += -2.0*b_coeff*float(confs[ispin, islice])*(
-                                    jval*float(confs[spinidx, islice])
-                                )
-                        # periodic boundaries
-                        if islice == 0:
-                            tleft = slices-1
-                            tright = 1
-                        elif islice == slices-1:
-                            tleft = slices-2
-                            tright = 0
-                        else:
-                            tleft = islice-1
-                            tright = islice+1
-                        # now calculate between neighboring slices
-                        ediffs[ispin, islice] += 2.0*float(confs[ispin, islice])*(jperp*float(confs[ispin, tleft]))
-                        ediffs[ispin, islice] += 2.0*float(confs[ispin, islice])*(jperp*float(confs[ispin, tright]))
-                        # system bath coupling
-                        # system bath coupling
-                        for b2 in xrange(1, slices):
-                            cslice = (bslice+b2)%slices
-                            ediffs[ispin, islice] += 2.0*teff*float(confs[ispin, islice]*confs[
-                                ispin, cslice])*lookuptable[b2-1]
-                        # Accept or reject
-                        if ediffs[ispin, islice] <= 0.0:  # avoid overflow
-                            confs[ispin, islice] *= -1
-                        elif cexp(-1.0 * ediffs[ispin, islice]/teff) > crand()/float(RAND_MAX):
-                            confs[ispin, islice] *= -1
                 # Fisher-Yates shuffling algorithm
                 for i in xrange(nspins):
                     ispins[i] = i
@@ -1603,50 +1553,55 @@ cpdef DissipativeQuantumAnnealWC2(np.float_t[:] A_sched,
                     ispins[i-1] = ispins[j]
                     ispins[j] = t
                 # start wolff updates
-                for sidx2 in xrange(nspins):
-                    ispin = ispins[sidx2]
-                    islice = crand() % slices
-                    cluster[0, 0] = ispin
-                    cluster[0, 1] = islice
-                    k = confs[ispin, islice]
-                    stack = 1
-                    stackidx = 1
-                    cluster_count = 0
-                    r = 1.0
-                    while True:
-                        ispin = cluster[cluster_count, 0]
-                        islice = cluster[cluster_count, 1]
-                        # add bath neighbours
-                        for b in xrange(1, slices):
-                            bslice = (islice+b)%slices
-                            if confs[ispin, bslice] == k:
-                                ediff = 0.0
-                                # ediff += -2.0*teff*lookuptable[b-1]
-                                # add bias energy
-                                for si2 in xrange(maxnb):
-                                    spinidx2 = int(nbs[ispin, si2, 0])
-                                    if ispin == spinidx2:
-                                        ediff += -2.0*b_coeff*nbs[ispin, si2, 1]*k
-                                    else:
-                                        ediff += -2.0*b_coeff*jval*k*confs[spinidx2, bslice]
-                                if bslice == 0:
-                                    tleft2 = slices - 1
-                                    tright2 = 1
-                                elif bslice == slices - 1:
-                                    tleft2 = slices - 2
-                                    tright2 = 0
+                for islice in xrange(slices):
+                    for sidx2 in xrange(nspins):
+                        e_total = 0.0
+                        ispin = ispins[sidx2]
+                        # islice = crand() % slices
+                        cluster[0, 0] = ispin
+                        cluster[0, 1] = islice
+                        k = confs[ispin, islice]
+                        confs[ispin, islice] *= -1
+                        stack = 1
+                        stackidx = 1
+                        cluster_count = 0
+                        r = 1.0
+                        while True:
+                            ispin = cluster[cluster_count, 0]
+                            islice = cluster[cluster_count, 1]
+                            # add energy
+                            # loop through the neighbors
+                            for si in xrange(maxnb):
+                                # get the neighbor spin index
+                                spinidx = int(nbs[ispin, si, 0])
+                                # get the coupling value to that neighbor
+                                jval = nbs[ispin, si, 1]
+                                # self-connections are not quadratic
+                                if spinidx == ispin:
+                                    e_total += -2.0*b_coeff*float(k)*jval
                                 else:
-                                    tleft2 = bslice - 1
-                                    tright2 = bslice + 1
-                                ediff += 2.0*jperp*k*confs[ispin, tleft2]
-                                ediff += 2.0*jperp*k*confs[ispin, tright2]
-                                # system bath coupling
-                                for b2 in xrange(1, slices):
-                                    cslice = (bslice+b2)%slices
-                                    ediff += 2.0*teff*float(k*confs[
-                                        ispin, cslice])*lookuptable[b2-1]
-                                if ediff < 0:
-                                    p = 1 - cexp(ediff/teff)
+                                    e_total += -2.0*b_coeff*float(k)*(
+                                        jval*float(confs[spinidx, islice])
+                                    )
+                            # periodic boundaries
+                            if islice == 0:
+                                tleft = slices-1
+                                tright = 1
+                            elif islice == slices-1:
+                                tleft = slices-2
+                                tright = 0
+                            else:
+                                tleft = islice-1
+                                tright = islice+1
+                            # now calculate between neighboring slices
+                            e_total += 2.0*float(k)*(jperp*float(confs[ispin, tleft]))
+                            e_total += 2.0*float(k)*(jperp*float(confs[ispin, tright]))
+                            # system bath coupling
+                            for b in xrange(1, slices):
+                                bslice = (islice+b)%slices
+                                # e_total += 2.0*teff*float(k*confs[ispin, bslice])*lookuptable[b-1]
+                                if confs[ispin, bslice] == k:
+                                    p = 1 - cexp(-2.0*lookuptable[b-1])
                                     if r*p > crand()/float(RAND_MAX):
                                         # add to cluster
                                         r *= p
@@ -1655,8 +1610,13 @@ cpdef DissipativeQuantumAnnealWC2(np.float_t[:] A_sched,
                                         confs[ispin, bslice] *= -1
                                         stack += 1
                                         stackidx += 1
-                        cluster_count += 1
-                        stack += -1
-                        if stack == 0:
-                            break
+                            cluster_count += 1
+                            stack += -1
+                            if stack == 0:
+                                break
+                        if e_total > 0.0:
+                            if 1 - cexp(-1.0*e_total/teff) > crand()/float(RAND_MAX):
+                                # undo cluster move as increased system energy
+                                for stackidx in xrange(cluster_count):
+                                    confs[cluster[stackidx, 0], cluster[stackidx, 1]] *= -1
 
