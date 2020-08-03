@@ -13,7 +13,4 @@ After cloning the repo, check that you have Microsoft Visdual studio, and that y
 Open and move to the directory with ```setup.py``` and run ```python.exe setup.py build_ext --inplace --compiler=msvc```.
 
 ## Usage
-See examples for general usage
-
-There are 8 different PIMC codes that can be used, the one current recommended and tested is that of 
-QuantumAnnealExplicitBathGlobal. This is where we implement open system dephasing dynamics with PIMC. 
+See examples for general usage. Not all functions are fully tested. Expect to see a 10x-80x improvement over traditional python. 
