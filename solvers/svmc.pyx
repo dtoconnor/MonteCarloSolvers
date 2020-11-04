@@ -92,7 +92,7 @@ cpdef SpinVectorMonteCarlo(np.ndarray[np.float64_t, ndim=1] A_sched,
                     else:
                         ediff += b_coeff*jval*zmagdiff*ccos(svec[spinidx])
                 # add x component
-                ediff += a_coeff * (csin(theta_prop) - csin(svec[sidx]))
+                ediff += a_coeff * (csin(svec[sidx]) - csin(theta_prop))
                 # Metropolis accept or reject
                 if ediff <= 0.0:  # avoid overflow
                     svec[sidx] = theta_prop
@@ -197,7 +197,7 @@ cpdef SpinVectorMonteCarlo_parallel(np.ndarray[np.float64_t, ndim=1] A_sched,
                         else:
                             ediffs[sidx] += b_coeff*jval*zmagdiff*ccos(svec[spinidx])
                     # add x component
-                    ediffs[sidx] += a_coeff*(csin(theta_prop) - csin(svec[sidx]))
+                    ediffs[sidx] += a_coeff*(csin(svec[sidx]) - csin(theta_prop))
                     # Metropolis accept or reject
                     if ediffs[sidx] <= 0.0:  # avoid overflow
                         svec[sidx] = theta_prop
@@ -249,6 +249,7 @@ cpdef SpinVectorMonteCarloTF(np.ndarray[np.float64_t, ndim=1] A_sched,
     cdef int ifield = 0
     cdef double a_coeff = 0.0
     cdef double b_coeff = 0.0
+    cdef double ab_ratio = 1.0
     cdef int step = 0
     cdef int sidx = 0
     cdef int si = 0
@@ -268,9 +269,11 @@ cpdef SpinVectorMonteCarloTF(np.ndarray[np.float64_t, ndim=1] A_sched,
             # Loop over spins
             for sidx in sidx_shuff:
                 # propose new theta
-                theta_prop = ((a_coeff/b_coeff) * crand()/float(RAND_MAX))
-                if crand()/float(RAND_MAX) > 0.5:
-                    theta_prop *= -1
+                ab_ratio = a_coeff/b_coeff
+                if ab_ratio > 1:
+                    theta_prop = (2.0 * pi * crand()/float(RAND_MAX)) - pi
+                else:
+                    theta_prop = ab_ratio * ((2.0 * pi * crand()/float(RAND_MAX)) - pi)
                 theta_prop = theta_prop + svec[sidx]
                 if theta_prop < 0:
                     theta_prop = 0.0
@@ -290,7 +293,7 @@ cpdef SpinVectorMonteCarloTF(np.ndarray[np.float64_t, ndim=1] A_sched,
                     else:
                         ediff += b_coeff*jval*zmagdiff*ccos(svec[spinidx])
                 # add x component
-                ediff += a_coeff * (csin(theta_prop) - csin(svec[sidx]))
+                ediff += a_coeff * (csin(svec[sidx]) - csin(theta_prop))
                 # Metropolis accept or reject
                 if ediff <= 0.0:  # avoid overflow
                     svec[sidx] = theta_prop
@@ -345,6 +348,7 @@ cpdef SpinVectorMonteCarloTF_parallel(np.ndarray[np.float64_t, ndim=1] A_sched,
     cdef int ifield = 0
     cdef double a_coeff = 0.0
     cdef double b_coeff = 0.0
+    cdef double ab_ratio = 1.0
     cdef int step = 0
     cdef int sidx = 0
     cdef int si = 0
@@ -380,9 +384,11 @@ cpdef SpinVectorMonteCarloTF_parallel(np.ndarray[np.float64_t, ndim=1] A_sched,
                     sidx = ispins[ispin]
                     ediffs[sidx] = 0.0  # reset
                     # propose new theta
-                    theta_prop = ((a_coeff/b_coeff) * crand()/float(RAND_MAX))
-                    if crand()/float(RAND_MAX) > 0.5:
-                        theta_prop *= -1
+                    ab_ratio = a_coeff/b_coeff
+                    if ab_ratio > 1:
+                        theta_prop = (2.0 * pi * crand()/float(RAND_MAX)) - pi
+                    else:
+                        theta_prop = ab_ratio * ((2.0 * pi * crand()/float(RAND_MAX)) - pi)
                     theta_prop = theta_prop + svec[sidx]
                     if theta_prop < 0:
                         theta_prop = 0.0
@@ -402,7 +408,7 @@ cpdef SpinVectorMonteCarloTF_parallel(np.ndarray[np.float64_t, ndim=1] A_sched,
                         else:
                             ediffs[sidx] += b_coeff*jval*zmagdiff*ccos(svec[spinidx])
                     # add x component
-                    ediffs[sidx] += a_coeff*(csin(theta_prop) - csin(svec[sidx]))
+                    ediffs[sidx] += a_coeff*(csin(svec[sidx]) - csin(theta_prop))
                     # Metropolis accept or reject
                     if ediffs[sidx] <= 0.0:  # avoid overflow
                         svec[sidx] = theta_prop
