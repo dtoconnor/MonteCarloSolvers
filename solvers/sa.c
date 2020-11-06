@@ -1447,6 +1447,53 @@ static CYTHON_INLINE int __pyx_sub_acquisition_count_locked(
 static CYTHON_INLINE void __Pyx_INC_MEMVIEW(__Pyx_memviewslice *, int, int);
 static CYTHON_INLINE void __Pyx_XDEC_MEMVIEW(__Pyx_memviewslice *, int, int);
 
+/* PyDictVersioning.proto */
+#if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
+#define __PYX_DICT_VERSION_INIT  ((PY_UINT64_T) -1)
+#define __PYX_GET_DICT_VERSION(dict)  (((PyDictObject*)(dict))->ma_version_tag)
+#define __PYX_UPDATE_DICT_CACHE(dict, value, cache_var, version_var)\
+    (version_var) = __PYX_GET_DICT_VERSION(dict);\
+    (cache_var) = (value);
+#define __PYX_PY_DICT_LOOKUP_IF_MODIFIED(VAR, DICT, LOOKUP) {\
+    static PY_UINT64_T __pyx_dict_version = 0;\
+    static PyObject *__pyx_dict_cached_value = NULL;\
+    if (likely(__PYX_GET_DICT_VERSION(DICT) == __pyx_dict_version)) {\
+        (VAR) = __pyx_dict_cached_value;\
+    } else {\
+        (VAR) = __pyx_dict_cached_value = (LOOKUP);\
+        __pyx_dict_version = __PYX_GET_DICT_VERSION(DICT);\
+    }\
+}
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj);
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj);
+static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version);
+#else
+#define __PYX_GET_DICT_VERSION(dict)  (0)
+#define __PYX_UPDATE_DICT_CACHE(dict, value, cache_var, version_var)
+#define __PYX_PY_DICT_LOOKUP_IF_MODIFIED(VAR, DICT, LOOKUP)  (VAR) = (LOOKUP);
+#endif
+
+/* GetModuleGlobalName.proto */
+#if CYTHON_USE_DICT_VERSIONS
+#define __Pyx_GetModuleGlobalName(var, name)  {\
+    static PY_UINT64_T __pyx_dict_version = 0;\
+    static PyObject *__pyx_dict_cached_value = NULL;\
+    (var) = (likely(__pyx_dict_version == __PYX_GET_DICT_VERSION(__pyx_d))) ?\
+        (likely(__pyx_dict_cached_value) ? __Pyx_NewRef(__pyx_dict_cached_value) : __Pyx_GetBuiltinName(name)) :\
+        __Pyx__GetModuleGlobalName(name, &__pyx_dict_version, &__pyx_dict_cached_value);\
+}
+#define __Pyx_GetModuleGlobalNameUncached(var, name)  {\
+    PY_UINT64_T __pyx_dict_version;\
+    PyObject *__pyx_dict_cached_value;\
+    (var) = __Pyx__GetModuleGlobalName(name, &__pyx_dict_version, &__pyx_dict_cached_value);\
+}
+static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_version, PyObject **dict_cached_value);
+#else
+#define __Pyx_GetModuleGlobalName(var, name)  (var) = __Pyx__GetModuleGlobalName(name)
+#define __Pyx_GetModuleGlobalNameUncached(var, name)  (var) = __Pyx__GetModuleGlobalName(name)
+static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name);
+#endif
+
 /* PyCFunctionFastCall.proto */
 #if CYTHON_FAST_PYCCALL
 static CYTHON_INLINE PyObject *__Pyx_PyCFunction_FastCall(PyObject *func, PyObject **args, Py_ssize_t nargs);
@@ -1484,6 +1531,9 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg
 #define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
 #endif
 
+/* PyObjectCall2Args.proto */
+static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2);
+
 /* PyObjectCallMethO.proto */
 #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg);
@@ -1492,16 +1542,10 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject
 /* PyObjectCallOneArg.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
 
-/* PyObjectCall2Args.proto */
-static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2);
-
 /* ExtTypeTest.proto */
 static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type);
 
 #define __Pyx_BufPtrStrided1d(type, buf, i0, s0) (type)((char*)buf + i0 * s0)
-/* BufferFallbackError.proto */
-static void __Pyx_RaiseBufferFallbackError(void);
-
 /* PyThreadStateGet.proto */
 #if CYTHON_FAST_THREAD_STATE
 #define __Pyx_PyThreadState_declare  PyThreadState *__pyx_tstate;
@@ -1558,53 +1602,6 @@ static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *nam
 
 /* None.proto */
 static CYTHON_INLINE void __Pyx_RaiseUnboundLocalError(const char *varname);
-
-/* PyDictVersioning.proto */
-#if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
-#define __PYX_DICT_VERSION_INIT  ((PY_UINT64_T) -1)
-#define __PYX_GET_DICT_VERSION(dict)  (((PyDictObject*)(dict))->ma_version_tag)
-#define __PYX_UPDATE_DICT_CACHE(dict, value, cache_var, version_var)\
-    (version_var) = __PYX_GET_DICT_VERSION(dict);\
-    (cache_var) = (value);
-#define __PYX_PY_DICT_LOOKUP_IF_MODIFIED(VAR, DICT, LOOKUP) {\
-    static PY_UINT64_T __pyx_dict_version = 0;\
-    static PyObject *__pyx_dict_cached_value = NULL;\
-    if (likely(__PYX_GET_DICT_VERSION(DICT) == __pyx_dict_version)) {\
-        (VAR) = __pyx_dict_cached_value;\
-    } else {\
-        (VAR) = __pyx_dict_cached_value = (LOOKUP);\
-        __pyx_dict_version = __PYX_GET_DICT_VERSION(DICT);\
-    }\
-}
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj);
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj);
-static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version);
-#else
-#define __PYX_GET_DICT_VERSION(dict)  (0)
-#define __PYX_UPDATE_DICT_CACHE(dict, value, cache_var, version_var)
-#define __PYX_PY_DICT_LOOKUP_IF_MODIFIED(VAR, DICT, LOOKUP)  (VAR) = (LOOKUP);
-#endif
-
-/* GetModuleGlobalName.proto */
-#if CYTHON_USE_DICT_VERSIONS
-#define __Pyx_GetModuleGlobalName(var, name)  {\
-    static PY_UINT64_T __pyx_dict_version = 0;\
-    static PyObject *__pyx_dict_cached_value = NULL;\
-    (var) = (likely(__pyx_dict_version == __PYX_GET_DICT_VERSION(__pyx_d))) ?\
-        (likely(__pyx_dict_cached_value) ? __Pyx_NewRef(__pyx_dict_cached_value) : __Pyx_GetBuiltinName(name)) :\
-        __Pyx__GetModuleGlobalName(name, &__pyx_dict_version, &__pyx_dict_cached_value);\
-}
-#define __Pyx_GetModuleGlobalNameUncached(var, name)  {\
-    PY_UINT64_T __pyx_dict_version;\
-    PyObject *__pyx_dict_cached_value;\
-    (var) = __Pyx__GetModuleGlobalName(name, &__pyx_dict_version, &__pyx_dict_cached_value);\
-}
-static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_version, PyObject **dict_cached_value);
-#else
-#define __Pyx_GetModuleGlobalName(var, name)  (var) = __Pyx__GetModuleGlobalName(name)
-#define __Pyx_GetModuleGlobalNameUncached(var, name)  (var) = __Pyx__GetModuleGlobalName(name)
-static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name);
-#endif
 
 /* RaiseException.proto */
 static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
@@ -2152,7 +2149,7 @@ static PyObject *contiguous = 0;
 static PyObject *indirect_contiguous = 0;
 static int __pyx_memoryview_thread_locks_used;
 static PyThread_type_lock __pyx_memoryview_thread_locks[8];
-static PyObject *__pyx_f_7solvers_2sa_Anneal(PyArrayObject *, int, PyArrayObject *, __Pyx_memviewslice, PyObject *, int __pyx_skip_dispatch); /*proto*/
+static PyObject *__pyx_f_7solvers_2sa_Anneal(PyArrayObject *, int, PyArrayObject *, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
 static PyObject *__pyx_f_7solvers_2sa_Anneal_parallel(__Pyx_memviewslice, int, __Pyx_memviewslice, __Pyx_memviewslice, int, int __pyx_skip_dispatch); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
 static void *__pyx_align_pointer(void *, size_t); /*proto*/
@@ -2195,9 +2192,9 @@ extern int __pyx_module_is_main_solvers__sa;
 int __pyx_module_is_main_solvers__sa = 0;
 
 /* Implementation of 'solvers.sa' */
-static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_xrange;
 static PyObject *__pyx_builtin_ValueError;
+static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_RuntimeError;
 static PyObject *__pyx_builtin_ImportError;
 static PyObject *__pyx_builtin_MemoryError;
@@ -2213,7 +2210,6 @@ static const char __pyx_k_np[] = "np";
 static const char __pyx_k_nbs[] = "nbs";
 static const char __pyx_k_new[] = "__new__";
 static const char __pyx_k_obj[] = "obj";
-static const char __pyx_k_rng[] = "rng";
 static const char __pyx_k_base[] = "base";
 static const char __pyx_k_dict[] = "__dict__";
 static const char __pyx_k_main[] = "__main__";
@@ -2267,7 +2263,6 @@ static const char __pyx_k_pyx_vtable[] = "__pyx_vtable__";
 static const char __pyx_k_ImportError[] = "ImportError";
 static const char __pyx_k_MemoryError[] = "MemoryError";
 static const char __pyx_k_PickleError[] = "PickleError";
-static const char __pyx_k_permutation[] = "permutation";
 static const char __pyx_k_RuntimeError[] = "RuntimeError";
 static const char __pyx_k_pyx_checksum[] = "__pyx_checksum";
 static const char __pyx_k_stringsource[] = "stringsource";
@@ -2383,7 +2378,6 @@ static PyObject *__pyx_kp_s_numpy_core_multiarray_failed_to;
 static PyObject *__pyx_kp_s_numpy_core_umath_failed_to_impor;
 static PyObject *__pyx_n_s_obj;
 static PyObject *__pyx_n_s_pack;
-static PyObject *__pyx_n_s_permutation;
 static PyObject *__pyx_n_s_pickle;
 static PyObject *__pyx_n_s_pyx_PickleError;
 static PyObject *__pyx_n_s_pyx_checksum;
@@ -2397,7 +2391,6 @@ static PyObject *__pyx_n_s_range;
 static PyObject *__pyx_n_s_reduce;
 static PyObject *__pyx_n_s_reduce_cython;
 static PyObject *__pyx_n_s_reduce_ex;
-static PyObject *__pyx_n_s_rng;
 static PyObject *__pyx_n_s_sched;
 static PyObject *__pyx_n_s_setstate;
 static PyObject *__pyx_n_s_setstate_cython;
@@ -2420,7 +2413,7 @@ static PyObject *__pyx_n_s_unpack;
 static PyObject *__pyx_n_s_update;
 static PyObject *__pyx_n_s_xrange;
 static PyObject *__pyx_n_s_zeros;
-static PyObject *__pyx_pf_7solvers_2sa_Anneal(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_sched, int __pyx_v_mcsteps, PyArrayObject *__pyx_v_svec, __Pyx_memviewslice __pyx_v_nbs, PyObject *__pyx_v_rng); /* proto */
+static PyObject *__pyx_pf_7solvers_2sa_Anneal(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_sched, int __pyx_v_mcsteps, PyArrayObject *__pyx_v_svec, __Pyx_memviewslice __pyx_v_nbs); /* proto */
 static PyObject *__pyx_pf_7solvers_2sa_2Anneal_parallel(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_sched, int __pyx_v_mcsteps, __Pyx_memviewslice __pyx_v_svec, __Pyx_memviewslice __pyx_v_nbs, int __pyx_v_nthreads); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
@@ -2517,7 +2510,7 @@ static PyObject *__pyx_codeobj__32;
  */
 
 static PyObject *__pyx_pw_7solvers_2sa_1Anneal(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_f_7solvers_2sa_Anneal(PyArrayObject *__pyx_v_sched, int __pyx_v_mcsteps, PyArrayObject *__pyx_v_svec, __Pyx_memviewslice __pyx_v_nbs, PyObject *__pyx_v_rng, CYTHON_UNUSED int __pyx_skip_dispatch) {
+static PyObject *__pyx_f_7solvers_2sa_Anneal(PyArrayObject *__pyx_v_sched, int __pyx_v_mcsteps, PyArrayObject *__pyx_v_svec, __Pyx_memviewslice __pyx_v_nbs, CYTHON_UNUSED int __pyx_skip_dispatch) {
   int __pyx_v_maxnb;
   int __pyx_v_nspins;
   int __pyx_v_schedsize;
@@ -2529,11 +2522,15 @@ static PyObject *__pyx_f_7solvers_2sa_Anneal(PyArrayObject *__pyx_v_sched, int _
   int __pyx_v_spinidx;
   double __pyx_v_jval;
   double __pyx_v_ediff;
-  PyArrayObject *__pyx_v_sidx_shuff = 0;
+  PyArrayObject *__pyx_v_ispins = 0;
+  int __pyx_v_t;
+  int __pyx_v_i;
+  int __pyx_v_j;
+  int __pyx_v_ispin;
+  __Pyx_LocalBuf_ND __pyx_pybuffernd_ispins;
+  __Pyx_Buffer __pyx_pybuffer_ispins;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_sched;
   __Pyx_Buffer __pyx_pybuffer_sched;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_sidx_shuff;
-  __Pyx_Buffer __pyx_pybuffer_sidx_shuff;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_svec;
   __Pyx_Buffer __pyx_pybuffer_svec;
   PyObject *__pyx_r = NULL;
@@ -2551,31 +2548,35 @@ static PyObject *__pyx_f_7solvers_2sa_Anneal(PyArrayObject *__pyx_v_sched, int _
   int __pyx_t_11;
   int __pyx_t_12;
   int __pyx_t_13;
-  Py_ssize_t __pyx_t_14;
-  PyObject *(*__pyx_t_15)(PyObject *);
+  int __pyx_t_14;
+  int __pyx_t_15;
   int __pyx_t_16;
-  int __pyx_t_17;
-  int __pyx_t_18;
+  Py_ssize_t __pyx_t_17;
+  Py_ssize_t __pyx_t_18;
   Py_ssize_t __pyx_t_19;
   Py_ssize_t __pyx_t_20;
   Py_ssize_t __pyx_t_21;
   Py_ssize_t __pyx_t_22;
-  Py_ssize_t __pyx_t_23;
-  Py_ssize_t __pyx_t_24;
+  int __pyx_t_23;
+  int __pyx_t_24;
   int __pyx_t_25;
   Py_ssize_t __pyx_t_26;
   Py_ssize_t __pyx_t_27;
   Py_ssize_t __pyx_t_28;
   Py_ssize_t __pyx_t_29;
   Py_ssize_t __pyx_t_30;
-  PyObject *__pyx_t_31 = NULL;
-  PyObject *__pyx_t_32 = NULL;
-  PyObject *__pyx_t_33 = NULL;
+  Py_ssize_t __pyx_t_31;
+  int __pyx_t_32;
+  Py_ssize_t __pyx_t_33;
+  Py_ssize_t __pyx_t_34;
+  Py_ssize_t __pyx_t_35;
+  Py_ssize_t __pyx_t_36;
+  Py_ssize_t __pyx_t_37;
   __Pyx_RefNannySetupContext("Anneal", 0);
-  __pyx_pybuffer_sidx_shuff.pybuffer.buf = NULL;
-  __pyx_pybuffer_sidx_shuff.refcount = 0;
-  __pyx_pybuffernd_sidx_shuff.data = NULL;
-  __pyx_pybuffernd_sidx_shuff.rcbuffer = &__pyx_pybuffer_sidx_shuff;
+  __pyx_pybuffer_ispins.pybuffer.buf = NULL;
+  __pyx_pybuffer_ispins.refcount = 0;
+  __pyx_pybuffernd_ispins.data = NULL;
+  __pyx_pybuffernd_ispins.rcbuffer = &__pyx_pybuffer_ispins;
   __pyx_pybuffer_sched.pybuffer.buf = NULL;
   __pyx_pybuffer_sched.refcount = 0;
   __pyx_pybuffernd_sched.data = NULL;
@@ -2595,7 +2596,7 @@ static PyObject *__pyx_f_7solvers_2sa_Anneal(PyArrayObject *__pyx_v_sched, int _
   }
   __pyx_pybuffernd_svec.diminfo[0].strides = __pyx_pybuffernd_svec.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_svec.diminfo[0].shape = __pyx_pybuffernd_svec.rcbuffer->pybuffer.shape[0];
 
-  /* "solvers/sa.pyx":49
+  /* "solvers/sa.pyx":48
  *     """
  *     # Define some variables
  *     cdef int maxnb = nbs[0].shape[0]             # <<<<<<<<<<<<<<
@@ -2608,7 +2609,7 @@ static PyObject *__pyx_f_7solvers_2sa_Anneal(PyArrayObject *__pyx_v_sched, int _
   {
     Py_ssize_t __pyx_tmp_idx = 0;
     Py_ssize_t __pyx_tmp_stride = __pyx_v_nbs.strides[0];
-        if ((0)) __PYX_ERR(0, 49, __pyx_L1_error)
+        if ((0)) __PYX_ERR(0, 48, __pyx_L1_error)
         __pyx_t_1.data += __pyx_tmp_idx * __pyx_tmp_stride;
 }
 
@@ -2625,7 +2626,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
   __pyx_t_1.memview = NULL;
   __pyx_t_1.data = NULL;
 
-  /* "solvers/sa.pyx":50
+  /* "solvers/sa.pyx":49
  *     # Define some variables
  *     cdef int maxnb = nbs[0].shape[0]
  *     cdef int nspins = svec.shape[0]             # <<<<<<<<<<<<<<
@@ -2634,20 +2635,20 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
  */
   __pyx_v_nspins = (__pyx_v_svec->dimensions[0]);
 
-  /* "solvers/sa.pyx":51
+  /* "solvers/sa.pyx":50
  *     cdef int maxnb = nbs[0].shape[0]
  *     cdef int nspins = svec.shape[0]
  *     cdef int schedsize = sched.size             # <<<<<<<<<<<<<<
  *     cdef int itemp = 0
  *     cdef double temp = 0.0
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_sched), __pyx_n_s_size); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_sched), __pyx_n_s_size); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 50, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 50, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_schedsize = __pyx_t_3;
 
-  /* "solvers/sa.pyx":52
+  /* "solvers/sa.pyx":51
  *     cdef int nspins = svec.shape[0]
  *     cdef int schedsize = sched.size
  *     cdef int itemp = 0             # <<<<<<<<<<<<<<
@@ -2656,7 +2657,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
  */
   __pyx_v_itemp = 0;
 
-  /* "solvers/sa.pyx":53
+  /* "solvers/sa.pyx":52
  *     cdef int schedsize = sched.size
  *     cdef int itemp = 0
  *     cdef double temp = 0.0             # <<<<<<<<<<<<<<
@@ -2665,7 +2666,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
  */
   __pyx_v_temp = 0.0;
 
-  /* "solvers/sa.pyx":54
+  /* "solvers/sa.pyx":53
  *     cdef int itemp = 0
  *     cdef double temp = 0.0
  *     cdef int step = 0             # <<<<<<<<<<<<<<
@@ -2674,7 +2675,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
  */
   __pyx_v_step = 0;
 
-  /* "solvers/sa.pyx":55
+  /* "solvers/sa.pyx":54
  *     cdef double temp = 0.0
  *     cdef int step = 0
  *     cdef int sidx = 0             # <<<<<<<<<<<<<<
@@ -2683,7 +2684,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
  */
   __pyx_v_sidx = 0;
 
-  /* "solvers/sa.pyx":56
+  /* "solvers/sa.pyx":55
  *     cdef int step = 0
  *     cdef int sidx = 0
  *     cdef int si = 0             # <<<<<<<<<<<<<<
@@ -2692,7 +2693,7 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
  */
   __pyx_v_si = 0;
 
-  /* "solvers/sa.pyx":57
+  /* "solvers/sa.pyx":56
  *     cdef int sidx = 0
  *     cdef int si = 0
  *     cdef int spinidx = 0             # <<<<<<<<<<<<<<
@@ -2701,359 +2702,411 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
  */
   __pyx_v_spinidx = 0;
 
-  /* "solvers/sa.pyx":58
+  /* "solvers/sa.pyx":57
  *     cdef int si = 0
  *     cdef int spinidx = 0
  *     cdef double jval = 0.0             # <<<<<<<<<<<<<<
  *     cdef double ediff = 0.0
- *     cdef np.ndarray[np.int_t, ndim=1] sidx_shuff = rng.permutation(range(nspins))
+ *     cdef np.ndarray[np.int_t, ndim=1] ispins = np.arange(nspins)
  */
   __pyx_v_jval = 0.0;
 
-  /* "solvers/sa.pyx":59
+  /* "solvers/sa.pyx":58
  *     cdef int spinidx = 0
  *     cdef double jval = 0.0
  *     cdef double ediff = 0.0             # <<<<<<<<<<<<<<
- *     cdef np.ndarray[np.int_t, ndim=1] sidx_shuff = rng.permutation(range(nspins))
- *     # Loop over temperatures
+ *     cdef np.ndarray[np.int_t, ndim=1] ispins = np.arange(nspins)
+ *     cdef int t = 0
  */
   __pyx_v_ediff = 0.0;
 
-  /* "solvers/sa.pyx":60
+  /* "solvers/sa.pyx":59
  *     cdef double jval = 0.0
  *     cdef double ediff = 0.0
- *     cdef np.ndarray[np.int_t, ndim=1] sidx_shuff = rng.permutation(range(nspins))             # <<<<<<<<<<<<<<
- *     # Loop over temperatures
- *     for itemp in xrange(schedsize):
+ *     cdef np.ndarray[np.int_t, ndim=1] ispins = np.arange(nspins)             # <<<<<<<<<<<<<<
+ *     cdef int t = 0
+ *     cdef int i = 0
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_rng, __pyx_n_s_permutation); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 60, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 59, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_nspins); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 60, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_arange); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 59, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 60, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = NULL;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_4);
-    if (likely(__pyx_t_5)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
-      __Pyx_INCREF(__pyx_t_5);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_nspins); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_6 = NULL;
+  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_5))) {
+    __pyx_t_6 = PyMethod_GET_SELF(__pyx_t_5);
+    if (likely(__pyx_t_6)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
+      __Pyx_INCREF(__pyx_t_6);
       __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_4, function);
+      __Pyx_DECREF_SET(__pyx_t_5, function);
     }
   }
-  __pyx_t_2 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_5, __pyx_t_6) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 60, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_2 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_6, __pyx_t_4) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 60, __pyx_L1_error)
+  if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 59, __pyx_L1_error)
   __pyx_t_7 = ((PyArrayObject *)__pyx_t_2);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_sidx_shuff.rcbuffer->pybuffer, (PyObject*)__pyx_t_7, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
-      __pyx_v_sidx_shuff = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_sidx_shuff.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(0, 60, __pyx_L1_error)
-    } else {__pyx_pybuffernd_sidx_shuff.diminfo[0].strides = __pyx_pybuffernd_sidx_shuff.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_sidx_shuff.diminfo[0].shape = __pyx_pybuffernd_sidx_shuff.rcbuffer->pybuffer.shape[0];
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_ispins.rcbuffer->pybuffer, (PyObject*)__pyx_t_7, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 1, 0, __pyx_stack) == -1)) {
+      __pyx_v_ispins = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf = NULL;
+      __PYX_ERR(0, 59, __pyx_L1_error)
+    } else {__pyx_pybuffernd_ispins.diminfo[0].strides = __pyx_pybuffernd_ispins.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_ispins.diminfo[0].shape = __pyx_pybuffernd_ispins.rcbuffer->pybuffer.shape[0];
     }
   }
   __pyx_t_7 = 0;
-  __pyx_v_sidx_shuff = ((PyArrayObject *)__pyx_t_2);
+  __pyx_v_ispins = ((PyArrayObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
+  /* "solvers/sa.pyx":60
+ *     cdef double ediff = 0.0
+ *     cdef np.ndarray[np.int_t, ndim=1] ispins = np.arange(nspins)
+ *     cdef int t = 0             # <<<<<<<<<<<<<<
+ *     cdef int i = 0
+ *     cdef int j = 0
+ */
+  __pyx_v_t = 0;
+
+  /* "solvers/sa.pyx":61
+ *     cdef np.ndarray[np.int_t, ndim=1] ispins = np.arange(nspins)
+ *     cdef int t = 0
+ *     cdef int i = 0             # <<<<<<<<<<<<<<
+ *     cdef int j = 0
+ * 
+ */
+  __pyx_v_i = 0;
+
   /* "solvers/sa.pyx":62
- *     cdef np.ndarray[np.int_t, ndim=1] sidx_shuff = rng.permutation(range(nspins))
+ *     cdef int t = 0
+ *     cdef int i = 0
+ *     cdef int j = 0             # <<<<<<<<<<<<<<
+ * 
  *     # Loop over temperatures
- *     for itemp in xrange(schedsize):             # <<<<<<<<<<<<<<
- *         # Get temperature
- *         temp = sched[itemp]
  */
-  __pyx_t_3 = __pyx_v_schedsize;
-  __pyx_t_8 = __pyx_t_3;
-  for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
-    __pyx_v_itemp = __pyx_t_9;
+  __pyx_v_j = 0;
 
-    /* "solvers/sa.pyx":64
- *     for itemp in xrange(schedsize):
- *         # Get temperature
- *         temp = sched[itemp]             # <<<<<<<<<<<<<<
- *         # Do some number of Monte Carlo steps
- *         for step in xrange(mcsteps):
+  /* "solvers/sa.pyx":65
+ * 
+ *     # Loop over temperatures
+ *     with nogil:             # <<<<<<<<<<<<<<
+ *         for itemp in xrange(schedsize):
+ *             # Get temperature
  */
-    __pyx_t_10 = __pyx_v_itemp;
-    __pyx_v_temp = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_sched.rcbuffer->pybuffer.buf, __pyx_t_10, __pyx_pybuffernd_sched.diminfo[0].strides));
+  {
+      #ifdef WITH_THREAD
+      PyThreadState *_save;
+      Py_UNBLOCK_THREADS
+      __Pyx_FastGIL_Remember();
+      #endif
+      /*try:*/ {
 
-    /* "solvers/sa.pyx":66
- *         temp = sched[itemp]
- *         # Do some number of Monte Carlo steps
- *         for step in xrange(mcsteps):             # <<<<<<<<<<<<<<
- *             # Loop over spins
- *             for sidx in sidx_shuff:
+        /* "solvers/sa.pyx":66
+ *     # Loop over temperatures
+ *     with nogil:
+ *         for itemp in xrange(schedsize):             # <<<<<<<<<<<<<<
+ *             # Get temperature
+ *             temp = sched[itemp]
  */
-    __pyx_t_11 = __pyx_v_mcsteps;
-    __pyx_t_12 = __pyx_t_11;
-    for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
-      __pyx_v_step = __pyx_t_13;
+        __pyx_t_3 = __pyx_v_schedsize;
+        __pyx_t_8 = __pyx_t_3;
+        for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
+          __pyx_v_itemp = __pyx_t_9;
 
-      /* "solvers/sa.pyx":68
- *         for step in xrange(mcsteps):
- *             # Loop over spins
- *             for sidx in sidx_shuff:             # <<<<<<<<<<<<<<
- *                 # loop through the given spin's neighbors
- *                 for si in xrange(maxnb):
+          /* "solvers/sa.pyx":68
+ *         for itemp in xrange(schedsize):
+ *             # Get temperature
+ *             temp = sched[itemp]             # <<<<<<<<<<<<<<
+ *             # Do some number of Monte Carlo steps
+ *             for step in xrange(mcsteps):
  */
-      if (likely(PyList_CheckExact(((PyObject *)__pyx_v_sidx_shuff))) || PyTuple_CheckExact(((PyObject *)__pyx_v_sidx_shuff))) {
-        __pyx_t_2 = ((PyObject *)__pyx_v_sidx_shuff); __Pyx_INCREF(__pyx_t_2); __pyx_t_14 = 0;
-        __pyx_t_15 = NULL;
-      } else {
-        __pyx_t_14 = -1; __pyx_t_2 = PyObject_GetIter(((PyObject *)__pyx_v_sidx_shuff)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 68, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_2);
-        __pyx_t_15 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 68, __pyx_L1_error)
-      }
-      for (;;) {
-        if (likely(!__pyx_t_15)) {
-          if (likely(PyList_CheckExact(__pyx_t_2))) {
-            if (__pyx_t_14 >= PyList_GET_SIZE(__pyx_t_2)) break;
-            #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-            __pyx_t_4 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_14); __Pyx_INCREF(__pyx_t_4); __pyx_t_14++; if (unlikely(0 < 0)) __PYX_ERR(0, 68, __pyx_L1_error)
-            #else
-            __pyx_t_4 = PySequence_ITEM(__pyx_t_2, __pyx_t_14); __pyx_t_14++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 68, __pyx_L1_error)
-            __Pyx_GOTREF(__pyx_t_4);
-            #endif
-          } else {
-            if (__pyx_t_14 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
-            #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-            __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_14); __Pyx_INCREF(__pyx_t_4); __pyx_t_14++; if (unlikely(0 < 0)) __PYX_ERR(0, 68, __pyx_L1_error)
-            #else
-            __pyx_t_4 = PySequence_ITEM(__pyx_t_2, __pyx_t_14); __pyx_t_14++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 68, __pyx_L1_error)
-            __Pyx_GOTREF(__pyx_t_4);
-            #endif
-          }
-        } else {
-          __pyx_t_4 = __pyx_t_15(__pyx_t_2);
-          if (unlikely(!__pyx_t_4)) {
-            PyObject* exc_type = PyErr_Occurred();
-            if (exc_type) {
-              if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-              else __PYX_ERR(0, 68, __pyx_L1_error)
+          __pyx_t_10 = __pyx_v_itemp;
+          __pyx_v_temp = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float64_t *, __pyx_pybuffernd_sched.rcbuffer->pybuffer.buf, __pyx_t_10, __pyx_pybuffernd_sched.diminfo[0].strides));
+
+          /* "solvers/sa.pyx":70
+ *             temp = sched[itemp]
+ *             # Do some number of Monte Carlo steps
+ *             for step in xrange(mcsteps):             # <<<<<<<<<<<<<<
+ *                 # Fisher-Yates shuffling algorithm
+ *                 # cannot use numpy.random.permutation due to nogil
+ */
+          __pyx_t_11 = __pyx_v_mcsteps;
+          __pyx_t_12 = __pyx_t_11;
+          for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
+            __pyx_v_step = __pyx_t_13;
+
+            /* "solvers/sa.pyx":73
+ *                 # Fisher-Yates shuffling algorithm
+ *                 # cannot use numpy.random.permutation due to nogil
+ *                 for i in xrange(nspins):             # <<<<<<<<<<<<<<
+ *                     ispins[i] = i
+ *                 for i in xrange(nspins, 0, -1):
+ */
+            __pyx_t_14 = __pyx_v_nspins;
+            __pyx_t_15 = __pyx_t_14;
+            for (__pyx_t_16 = 0; __pyx_t_16 < __pyx_t_15; __pyx_t_16+=1) {
+              __pyx_v_i = __pyx_t_16;
+
+              /* "solvers/sa.pyx":74
+ *                 # cannot use numpy.random.permutation due to nogil
+ *                 for i in xrange(nspins):
+ *                     ispins[i] = i             # <<<<<<<<<<<<<<
+ *                 for i in xrange(nspins, 0, -1):
+ *                     j = crand() % i
+ */
+              __pyx_t_17 = __pyx_v_i;
+              *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_17, __pyx_pybuffernd_ispins.diminfo[0].strides) = __pyx_v_i;
             }
-            break;
-          }
-          __Pyx_GOTREF(__pyx_t_4);
-        }
-        __pyx_t_16 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_16 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 68, __pyx_L1_error)
-        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-        __pyx_v_sidx = __pyx_t_16;
 
-        /* "solvers/sa.pyx":70
- *             for sidx in sidx_shuff:
- *                 # loop through the given spin's neighbors
- *                 for si in xrange(maxnb):             # <<<<<<<<<<<<<<
- *                     # get the neighbor spin index
- *                     spinidx = int(nbs[sidx,si,0])
+            /* "solvers/sa.pyx":75
+ *                 for i in xrange(nspins):
+ *                     ispins[i] = i
+ *                 for i in xrange(nspins, 0, -1):             # <<<<<<<<<<<<<<
+ *                     j = crand() % i
+ *                     t = ispins[i-1]
  */
-        __pyx_t_16 = __pyx_v_maxnb;
-        __pyx_t_17 = __pyx_t_16;
-        for (__pyx_t_18 = 0; __pyx_t_18 < __pyx_t_17; __pyx_t_18+=1) {
-          __pyx_v_si = __pyx_t_18;
+            for (__pyx_t_14 = __pyx_v_nspins; __pyx_t_14 > 0; __pyx_t_14-=1) {
+              __pyx_v_i = __pyx_t_14;
 
-          /* "solvers/sa.pyx":72
- *                 for si in xrange(maxnb):
- *                     # get the neighbor spin index
- *                     spinidx = int(nbs[sidx,si,0])             # <<<<<<<<<<<<<<
- *                     # get the coupling value to that neighbor
- *                     jval = nbs[sidx,si,1]
+              /* "solvers/sa.pyx":76
+ *                     ispins[i] = i
+ *                 for i in xrange(nspins, 0, -1):
+ *                     j = crand() % i             # <<<<<<<<<<<<<<
+ *                     t = ispins[i-1]
+ *                     ispins[i-1] = ispins[j]
  */
-          __pyx_t_19 = __pyx_v_sidx;
-          __pyx_t_20 = __pyx_v_si;
-          __pyx_t_21 = 0;
-          __pyx_v_spinidx = ((int)(*((__pyx_t_5numpy_float64_t *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_nbs.data + __pyx_t_19 * __pyx_v_nbs.strides[0]) ) + __pyx_t_20 * __pyx_v_nbs.strides[1]) ) + __pyx_t_21 * __pyx_v_nbs.strides[2]) ))));
+              __pyx_v_j = (rand() % __pyx_v_i);
 
-          /* "solvers/sa.pyx":74
- *                     spinidx = int(nbs[sidx,si,0])
- *                     # get the coupling value to that neighbor
- *                     jval = nbs[sidx,si,1]             # <<<<<<<<<<<<<<
- *                     # self-connections are not quadratic
- *                     if spinidx == sidx:
+              /* "solvers/sa.pyx":77
+ *                 for i in xrange(nspins, 0, -1):
+ *                     j = crand() % i
+ *                     t = ispins[i-1]             # <<<<<<<<<<<<<<
+ *                     ispins[i-1] = ispins[j]
+ *                     ispins[j] = t
  */
-          __pyx_t_22 = __pyx_v_sidx;
-          __pyx_t_23 = __pyx_v_si;
-          __pyx_t_24 = 1;
-          __pyx_v_jval = (*((__pyx_t_5numpy_float64_t *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_nbs.data + __pyx_t_22 * __pyx_v_nbs.strides[0]) ) + __pyx_t_23 * __pyx_v_nbs.strides[1]) ) + __pyx_t_24 * __pyx_v_nbs.strides[2]) )));
+              __pyx_t_18 = (__pyx_v_i - 1);
+              __pyx_v_t = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_18, __pyx_pybuffernd_ispins.diminfo[0].strides));
 
-          /* "solvers/sa.pyx":76
- *                     jval = nbs[sidx,si,1]
- *                     # self-connections are not quadratic
- *                     if spinidx == sidx:             # <<<<<<<<<<<<<<
- *                         ediff += -2.0*float(svec[sidx])*jval
- *                     # calculate the energy diff of flipping this spin
+              /* "solvers/sa.pyx":78
+ *                     j = crand() % i
+ *                     t = ispins[i-1]
+ *                     ispins[i-1] = ispins[j]             # <<<<<<<<<<<<<<
+ *                     ispins[j] = t
+ *                 # Loop over spins
  */
-          __pyx_t_25 = ((__pyx_v_spinidx == __pyx_v_sidx) != 0);
-          if (__pyx_t_25) {
+              __pyx_t_19 = __pyx_v_j;
+              __pyx_t_20 = (__pyx_v_i - 1);
+              *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_ispins.diminfo[0].strides) = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_19, __pyx_pybuffernd_ispins.diminfo[0].strides));
 
-            /* "solvers/sa.pyx":77
- *                     # self-connections are not quadratic
- *                     if spinidx == sidx:
- *                         ediff += -2.0*float(svec[sidx])*jval             # <<<<<<<<<<<<<<
- *                     # calculate the energy diff of flipping this spin
- *                     else:
+              /* "solvers/sa.pyx":79
+ *                     t = ispins[i-1]
+ *                     ispins[i-1] = ispins[j]
+ *                     ispins[j] = t             # <<<<<<<<<<<<<<
+ *                 # Loop over spins
+ *                 for ispin in xrange(nspins):
  */
-            __pyx_t_26 = __pyx_v_sidx;
-            __pyx_v_ediff = (__pyx_v_ediff + ((-2.0 * ((double)(*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_svec.rcbuffer->pybuffer.buf, __pyx_t_26, __pyx_pybuffernd_svec.diminfo[0].strides)))) * __pyx_v_jval));
+              __pyx_t_21 = __pyx_v_j;
+              *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_21, __pyx_pybuffernd_ispins.diminfo[0].strides) = __pyx_v_t;
+            }
 
-            /* "solvers/sa.pyx":76
- *                     jval = nbs[sidx,si,1]
- *                     # self-connections are not quadratic
- *                     if spinidx == sidx:             # <<<<<<<<<<<<<<
- *                         ediff += -2.0*float(svec[sidx])*jval
- *                     # calculate the energy diff of flipping this spin
+            /* "solvers/sa.pyx":81
+ *                     ispins[j] = t
+ *                 # Loop over spins
+ *                 for ispin in xrange(nspins):             # <<<<<<<<<<<<<<
+ *                     sidx = ispins[ispin]
+ *                     # loop through the given spin's neighbors
  */
-            goto __pyx_L11;
-          }
+            __pyx_t_14 = __pyx_v_nspins;
+            __pyx_t_15 = __pyx_t_14;
+            for (__pyx_t_16 = 0; __pyx_t_16 < __pyx_t_15; __pyx_t_16+=1) {
+              __pyx_v_ispin = __pyx_t_16;
 
-          /* "solvers/sa.pyx":80
- *                     # calculate the energy diff of flipping this spin
- *                     else:
- *                         ediff += -2.0*float(svec[sidx])*(jval*float(svec[spinidx]))             # <<<<<<<<<<<<<<
- *                 # Metropolis accept or reject
- *                 if ediff <= 0.0:  # avoid overflow
+              /* "solvers/sa.pyx":82
+ *                 # Loop over spins
+ *                 for ispin in xrange(nspins):
+ *                     sidx = ispins[ispin]             # <<<<<<<<<<<<<<
+ *                     # loop through the given spin's neighbors
+ *                     for si in xrange(maxnb):
  */
-          /*else*/ {
-            __pyx_t_27 = __pyx_v_sidx;
-            __pyx_t_28 = __pyx_v_spinidx;
-            __pyx_v_ediff = (__pyx_v_ediff + ((-2.0 * ((double)(*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_svec.rcbuffer->pybuffer.buf, __pyx_t_27, __pyx_pybuffernd_svec.diminfo[0].strides)))) * (__pyx_v_jval * ((double)(*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_svec.rcbuffer->pybuffer.buf, __pyx_t_28, __pyx_pybuffernd_svec.diminfo[0].strides))))));
-          }
-          __pyx_L11:;
-        }
+              __pyx_t_22 = __pyx_v_ispin;
+              __pyx_v_sidx = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_ispins.diminfo[0].strides));
 
-        /* "solvers/sa.pyx":82
- *                         ediff += -2.0*float(svec[sidx])*(jval*float(svec[spinidx]))
- *                 # Metropolis accept or reject
- *                 if ediff <= 0.0:  # avoid overflow             # <<<<<<<<<<<<<<
- *                     svec[sidx] *= -1
- *                 elif cexp(-1.0 * ediff/temp) > crand()/float(RAND_MAX):
+              /* "solvers/sa.pyx":84
+ *                     sidx = ispins[ispin]
+ *                     # loop through the given spin's neighbors
+ *                     for si in xrange(maxnb):             # <<<<<<<<<<<<<<
+ *                         # get the neighbor spin index
+ *                         spinidx = int(nbs[sidx,si,0])
  */
-        __pyx_t_25 = ((__pyx_v_ediff <= 0.0) != 0);
-        if (__pyx_t_25) {
+              __pyx_t_23 = __pyx_v_maxnb;
+              __pyx_t_24 = __pyx_t_23;
+              for (__pyx_t_25 = 0; __pyx_t_25 < __pyx_t_24; __pyx_t_25+=1) {
+                __pyx_v_si = __pyx_t_25;
 
-          /* "solvers/sa.pyx":83
- *                 # Metropolis accept or reject
- *                 if ediff <= 0.0:  # avoid overflow
- *                     svec[sidx] *= -1             # <<<<<<<<<<<<<<
- *                 elif cexp(-1.0 * ediff/temp) > crand()/float(RAND_MAX):
- *                     svec[sidx] *= -1
+                /* "solvers/sa.pyx":86
+ *                     for si in xrange(maxnb):
+ *                         # get the neighbor spin index
+ *                         spinidx = int(nbs[sidx,si,0])             # <<<<<<<<<<<<<<
+ *                         # get the coupling value to that neighbor
+ *                         jval = nbs[sidx,si,1]
  */
-          __pyx_t_29 = __pyx_v_sidx;
-          *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_svec.rcbuffer->pybuffer.buf, __pyx_t_29, __pyx_pybuffernd_svec.diminfo[0].strides) *= -1L;
+                __pyx_t_26 = __pyx_v_sidx;
+                __pyx_t_27 = __pyx_v_si;
+                __pyx_t_28 = 0;
+                __pyx_v_spinidx = ((int)(*((__pyx_t_5numpy_float64_t *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_nbs.data + __pyx_t_26 * __pyx_v_nbs.strides[0]) ) + __pyx_t_27 * __pyx_v_nbs.strides[1]) ) + __pyx_t_28 * __pyx_v_nbs.strides[2]) ))));
 
-          /* "solvers/sa.pyx":82
- *                         ediff += -2.0*float(svec[sidx])*(jval*float(svec[spinidx]))
- *                 # Metropolis accept or reject
- *                 if ediff <= 0.0:  # avoid overflow             # <<<<<<<<<<<<<<
- *                     svec[sidx] *= -1
- *                 elif cexp(-1.0 * ediff/temp) > crand()/float(RAND_MAX):
+                /* "solvers/sa.pyx":88
+ *                         spinidx = int(nbs[sidx,si,0])
+ *                         # get the coupling value to that neighbor
+ *                         jval = nbs[sidx,si,1]             # <<<<<<<<<<<<<<
+ *                         # self-connections are not quadratic
+ *                         if spinidx == sidx:
  */
-          goto __pyx_L12;
-        }
+                __pyx_t_29 = __pyx_v_sidx;
+                __pyx_t_30 = __pyx_v_si;
+                __pyx_t_31 = 1;
+                __pyx_v_jval = (*((__pyx_t_5numpy_float64_t *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_nbs.data + __pyx_t_29 * __pyx_v_nbs.strides[0]) ) + __pyx_t_30 * __pyx_v_nbs.strides[1]) ) + __pyx_t_31 * __pyx_v_nbs.strides[2]) )));
 
-        /* "solvers/sa.pyx":84
- *                 if ediff <= 0.0:  # avoid overflow
- *                     svec[sidx] *= -1
- *                 elif cexp(-1.0 * ediff/temp) > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
- *                     svec[sidx] *= -1
- *                 # Reset energy diff value
+                /* "solvers/sa.pyx":90
+ *                         jval = nbs[sidx,si,1]
+ *                         # self-connections are not quadratic
+ *                         if spinidx == sidx:             # <<<<<<<<<<<<<<
+ *                             ediff += -2.0*float(svec[sidx])*jval
+ *                         # calculate the energy diff of flipping this spin
  */
-        __pyx_t_25 = ((exp(((-1.0 * __pyx_v_ediff) / __pyx_v_temp)) > (rand() / ((double)RAND_MAX))) != 0);
-        if (__pyx_t_25) {
+                __pyx_t_32 = ((__pyx_v_spinidx == __pyx_v_sidx) != 0);
+                if (__pyx_t_32) {
 
-          /* "solvers/sa.pyx":85
- *                     svec[sidx] *= -1
- *                 elif cexp(-1.0 * ediff/temp) > crand()/float(RAND_MAX):
- *                     svec[sidx] *= -1             # <<<<<<<<<<<<<<
- *                 # Reset energy diff value
- *                 ediff = 0.0
+                  /* "solvers/sa.pyx":91
+ *                         # self-connections are not quadratic
+ *                         if spinidx == sidx:
+ *                             ediff += -2.0*float(svec[sidx])*jval             # <<<<<<<<<<<<<<
+ *                         # calculate the energy diff of flipping this spin
+ *                         else:
  */
-          __pyx_t_30 = __pyx_v_sidx;
-          *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_svec.rcbuffer->pybuffer.buf, __pyx_t_30, __pyx_pybuffernd_svec.diminfo[0].strides) *= -1L;
+                  __pyx_t_33 = __pyx_v_sidx;
+                  __pyx_v_ediff = (__pyx_v_ediff + ((-2.0 * ((double)(*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_svec.rcbuffer->pybuffer.buf, __pyx_t_33, __pyx_pybuffernd_svec.diminfo[0].strides)))) * __pyx_v_jval));
 
-          /* "solvers/sa.pyx":84
- *                 if ediff <= 0.0:  # avoid overflow
- *                     svec[sidx] *= -1
- *                 elif cexp(-1.0 * ediff/temp) > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
- *                     svec[sidx] *= -1
- *                 # Reset energy diff value
+                  /* "solvers/sa.pyx":90
+ *                         jval = nbs[sidx,si,1]
+ *                         # self-connections are not quadratic
+ *                         if spinidx == sidx:             # <<<<<<<<<<<<<<
+ *                             ediff += -2.0*float(svec[sidx])*jval
+ *                         # calculate the energy diff of flipping this spin
  */
-        }
-        __pyx_L12:;
+                  goto __pyx_L18;
+                }
 
-        /* "solvers/sa.pyx":87
- *                     svec[sidx] *= -1
- *                 # Reset energy diff value
- *                 ediff = 0.0             # <<<<<<<<<<<<<<
- *             sidx_shuff = rng.permutation(sidx_shuff)
+                /* "solvers/sa.pyx":94
+ *                         # calculate the energy diff of flipping this spin
+ *                         else:
+ *                             ediff += -2.0*float(svec[sidx])*(jval*float(svec[spinidx]))             # <<<<<<<<<<<<<<
+ *                     # Metropolis accept or reject
+ *                     if ediff <= 0.0:  # avoid overflow
+ */
+                /*else*/ {
+                  __pyx_t_34 = __pyx_v_sidx;
+                  __pyx_t_35 = __pyx_v_spinidx;
+                  __pyx_v_ediff = (__pyx_v_ediff + ((-2.0 * ((double)(*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_svec.rcbuffer->pybuffer.buf, __pyx_t_34, __pyx_pybuffernd_svec.diminfo[0].strides)))) * (__pyx_v_jval * ((double)(*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_svec.rcbuffer->pybuffer.buf, __pyx_t_35, __pyx_pybuffernd_svec.diminfo[0].strides))))));
+                }
+                __pyx_L18:;
+              }
+
+              /* "solvers/sa.pyx":96
+ *                             ediff += -2.0*float(svec[sidx])*(jval*float(svec[spinidx]))
+ *                     # Metropolis accept or reject
+ *                     if ediff <= 0.0:  # avoid overflow             # <<<<<<<<<<<<<<
+ *                         svec[sidx] *= -1
+ *                     elif cexp(-1.0 * ediff/temp) > crand()/float(RAND_MAX):
+ */
+              __pyx_t_32 = ((__pyx_v_ediff <= 0.0) != 0);
+              if (__pyx_t_32) {
+
+                /* "solvers/sa.pyx":97
+ *                     # Metropolis accept or reject
+ *                     if ediff <= 0.0:  # avoid overflow
+ *                         svec[sidx] *= -1             # <<<<<<<<<<<<<<
+ *                     elif cexp(-1.0 * ediff/temp) > crand()/float(RAND_MAX):
+ *                         svec[sidx] *= -1
+ */
+                __pyx_t_36 = __pyx_v_sidx;
+                *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_svec.rcbuffer->pybuffer.buf, __pyx_t_36, __pyx_pybuffernd_svec.diminfo[0].strides) *= -1L;
+
+                /* "solvers/sa.pyx":96
+ *                             ediff += -2.0*float(svec[sidx])*(jval*float(svec[spinidx]))
+ *                     # Metropolis accept or reject
+ *                     if ediff <= 0.0:  # avoid overflow             # <<<<<<<<<<<<<<
+ *                         svec[sidx] *= -1
+ *                     elif cexp(-1.0 * ediff/temp) > crand()/float(RAND_MAX):
+ */
+                goto __pyx_L19;
+              }
+
+              /* "solvers/sa.pyx":98
+ *                     if ediff <= 0.0:  # avoid overflow
+ *                         svec[sidx] *= -1
+ *                     elif cexp(-1.0 * ediff/temp) > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
+ *                         svec[sidx] *= -1
+ *                     # Reset energy diff value
+ */
+              __pyx_t_32 = ((exp(((-1.0 * __pyx_v_ediff) / __pyx_v_temp)) > (rand() / ((double)RAND_MAX))) != 0);
+              if (__pyx_t_32) {
+
+                /* "solvers/sa.pyx":99
+ *                         svec[sidx] *= -1
+ *                     elif cexp(-1.0 * ediff/temp) > crand()/float(RAND_MAX):
+ *                         svec[sidx] *= -1             # <<<<<<<<<<<<<<
+ *                     # Reset energy diff value
+ *                     ediff = 0.0
+ */
+                __pyx_t_37 = __pyx_v_sidx;
+                *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_svec.rcbuffer->pybuffer.buf, __pyx_t_37, __pyx_pybuffernd_svec.diminfo[0].strides) *= -1L;
+
+                /* "solvers/sa.pyx":98
+ *                     if ediff <= 0.0:  # avoid overflow
+ *                         svec[sidx] *= -1
+ *                     elif cexp(-1.0 * ediff/temp) > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
+ *                         svec[sidx] *= -1
+ *                     # Reset energy diff value
+ */
+              }
+              __pyx_L19:;
+
+              /* "solvers/sa.pyx":101
+ *                         svec[sidx] *= -1
+ *                     # Reset energy diff value
+ *                     ediff = 0.0             # <<<<<<<<<<<<<<
+ * 
  * 
  */
-        __pyx_v_ediff = 0.0;
-
-        /* "solvers/sa.pyx":68
- *         for step in xrange(mcsteps):
- *             # Loop over spins
- *             for sidx in sidx_shuff:             # <<<<<<<<<<<<<<
- *                 # loop through the given spin's neighbors
- *                 for si in xrange(maxnb):
- */
-      }
-      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-      /* "solvers/sa.pyx":88
- *                 # Reset energy diff value
- *                 ediff = 0.0
- *             sidx_shuff = rng.permutation(sidx_shuff)             # <<<<<<<<<<<<<<
- * 
- * 
- */
-      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_rng, __pyx_n_s_permutation); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 88, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_6 = NULL;
-      if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
-        __pyx_t_6 = PyMethod_GET_SELF(__pyx_t_4);
-        if (likely(__pyx_t_6)) {
-          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
-          __Pyx_INCREF(__pyx_t_6);
-          __Pyx_INCREF(function);
-          __Pyx_DECREF_SET(__pyx_t_4, function);
-        }
-      }
-      __pyx_t_2 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_6, ((PyObject *)__pyx_v_sidx_shuff)) : __Pyx_PyObject_CallOneArg(__pyx_t_4, ((PyObject *)__pyx_v_sidx_shuff));
-      __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-      if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 88, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 88, __pyx_L1_error)
-      __pyx_t_7 = ((PyArrayObject *)__pyx_t_2);
-      {
-        __Pyx_BufFmt_StackElem __pyx_stack[1];
-        __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_sidx_shuff.rcbuffer->pybuffer);
-        __pyx_t_16 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_sidx_shuff.rcbuffer->pybuffer, (PyObject*)__pyx_t_7, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack);
-        if (unlikely(__pyx_t_16 < 0)) {
-          PyErr_Fetch(&__pyx_t_31, &__pyx_t_32, &__pyx_t_33);
-          if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_sidx_shuff.rcbuffer->pybuffer, (PyObject*)__pyx_v_sidx_shuff, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
-            Py_XDECREF(__pyx_t_31); Py_XDECREF(__pyx_t_32); Py_XDECREF(__pyx_t_33);
-            __Pyx_RaiseBufferFallbackError();
-          } else {
-            PyErr_Restore(__pyx_t_31, __pyx_t_32, __pyx_t_33);
+              __pyx_v_ediff = 0.0;
+            }
           }
-          __pyx_t_31 = __pyx_t_32 = __pyx_t_33 = 0;
         }
-        __pyx_pybuffernd_sidx_shuff.diminfo[0].strides = __pyx_pybuffernd_sidx_shuff.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_sidx_shuff.diminfo[0].shape = __pyx_pybuffernd_sidx_shuff.rcbuffer->pybuffer.shape[0];
-        if (unlikely(__pyx_t_16 < 0)) __PYX_ERR(0, 88, __pyx_L1_error)
       }
-      __pyx_t_7 = 0;
-      __Pyx_DECREF_SET(__pyx_v_sidx_shuff, ((PyArrayObject *)__pyx_t_2));
-      __pyx_t_2 = 0;
-    }
+
+      /* "solvers/sa.pyx":65
+ * 
+ *     # Loop over temperatures
+ *     with nogil:             # <<<<<<<<<<<<<<
+ *         for itemp in xrange(schedsize):
+ *             # Get temperature
+ */
+      /*finally:*/ {
+        /*normal exit:*/{
+          #ifdef WITH_THREAD
+          __Pyx_FastGIL_Forget();
+          Py_BLOCK_THREADS
+          #endif
+          goto __pyx_L5;
+        }
+        __pyx_L5:;
+      }
   }
 
   /* "solvers/sa.pyx":19
@@ -3077,19 +3130,19 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
     __Pyx_PyThreadState_declare
     __Pyx_PyThreadState_assign
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
+    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_ispins.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_sched.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_sidx_shuff.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_svec.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
   __Pyx_AddTraceback("solvers.sa.Anneal", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   goto __pyx_L2;
   __pyx_L0:;
+  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_ispins.rcbuffer->pybuffer);
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_sched.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_sidx_shuff.rcbuffer->pybuffer);
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_svec.rcbuffer->pybuffer);
   __pyx_L2:;
-  __Pyx_XDECREF((PyObject *)__pyx_v_sidx_shuff);
+  __Pyx_XDECREF((PyObject *)__pyx_v_ispins);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
@@ -3097,25 +3150,22 @@ __pyx_v_maxnb = (__pyx_t_1.shape[0]);
 
 /* Python wrapper */
 static PyObject *__pyx_pw_7solvers_2sa_1Anneal(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_7solvers_2sa_Anneal[] = "Anneal(ndarray sched, int mcsteps, ndarray svec, float64_t[:, :, :] nbs, rng)\n\n    Execute thermal annealing according to @sched with @mcsteps\n    sweeps for each annealing step. Starting configuration is \n    given by @svec, which we update in-place and calculate energies\n    using the \"neighbors array\" @nbs.\n\n    Args:\n        @sched (np.array, float): an array of temperatures that specify\n                                  the annealing schedule\n        @mcsteps (int): number of sweeps to do on each annealing step\n        @svec (np.array, float): contains the starting configuration\n        @nbs (np.ndarray, float): 3D array whose 1st dimension indexes\n                                  each spin, 2nd dimension indexes\n                                  neighbors to some spin, and 3rd\n                                  dimension indexes the spin index\n                                  of that neighbor (first element)\n                                  or the coupling value to that\n                                  neighbor (second element). See\n                                  tools.GenerateNeighbors().\n        @rng (np.RandomState): numpy random number generator object\n\n    Returns:\n        None: spins are flipped in-place within @svec\n    ";
+static char __pyx_doc_7solvers_2sa_Anneal[] = "Anneal(ndarray sched, int mcsteps, ndarray svec, float64_t[:, :, :] nbs)\n\n    Execute thermal annealing according to @sched with @mcsteps\n    sweeps for each annealing step. Starting configuration is \n    given by @svec, which we update in-place and calculate energies\n    using the \"neighbors array\" @nbs.\n\n    Args:\n        @sched (np.array, float): an array of temperatures that specify\n                                  the annealing schedule\n        @mcsteps (int): number of sweeps to do on each annealing step\n        @svec (np.array, float): contains the starting configuration\n        @nbs (np.ndarray, float): 3D array whose 1st dimension indexes\n                                  each spin, 2nd dimension indexes\n                                  neighbors to some spin, and 3rd\n                                  dimension indexes the spin index\n                                  of that neighbor (first element)\n                                  or the coupling value to that\n                                  neighbor (second element). See\n                                  tools.GenerateNeighbors().\n        @rng (np.RandomState): numpy random number generator object\n\n    Returns:\n        None: spins are flipped in-place within @svec\n    ";
 static PyObject *__pyx_pw_7solvers_2sa_1Anneal(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_sched = 0;
   int __pyx_v_mcsteps;
   PyArrayObject *__pyx_v_svec = 0;
   __Pyx_memviewslice __pyx_v_nbs = { 0, 0, { 0 }, { 0 }, { 0 } };
-  PyObject *__pyx_v_rng = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("Anneal (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_sched,&__pyx_n_s_mcsteps,&__pyx_n_s_svec,&__pyx_n_s_nbs,&__pyx_n_s_rng,0};
-    PyObject* values[5] = {0,0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_sched,&__pyx_n_s_mcsteps,&__pyx_n_s_svec,&__pyx_n_s_nbs,0};
+    PyObject* values[4] = {0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
-        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
-        CYTHON_FALLTHROUGH;
         case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
         CYTHON_FALLTHROUGH;
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
@@ -3136,48 +3186,40 @@ static PyObject *__pyx_pw_7solvers_2sa_1Anneal(PyObject *__pyx_self, PyObject *_
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_mcsteps)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("Anneal", 1, 5, 5, 1); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("Anneal", 1, 4, 4, 1); __PYX_ERR(0, 19, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_svec)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("Anneal", 1, 5, 5, 2); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("Anneal", 1, 4, 4, 2); __PYX_ERR(0, 19, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_nbs)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("Anneal", 1, 5, 5, 3); __PYX_ERR(0, 19, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case  4:
-        if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_rng)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("Anneal", 1, 5, 5, 4); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("Anneal", 1, 4, 4, 3); __PYX_ERR(0, 19, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "Anneal") < 0)) __PYX_ERR(0, 19, __pyx_L3_error)
       }
-    } else if (PyTuple_GET_SIZE(__pyx_args) != 5) {
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
       values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
-      values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
     }
     __pyx_v_sched = ((PyArrayObject *)values[0]);
     __pyx_v_mcsteps = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_mcsteps == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 20, __pyx_L3_error)
     __pyx_v_svec = ((PyArrayObject *)values[2]);
     __pyx_v_nbs = __Pyx_PyObject_to_MemoryviewSlice_dsdsds_nn___pyx_t_5numpy_float64_t(values[3], PyBUF_WRITABLE); if (unlikely(!__pyx_v_nbs.memview)) __PYX_ERR(0, 22, __pyx_L3_error)
-    __pyx_v_rng = values[4];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("Anneal", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 19, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("Anneal", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 19, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("solvers.sa.Anneal", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3185,7 +3227,7 @@ static PyObject *__pyx_pw_7solvers_2sa_1Anneal(PyObject *__pyx_self, PyObject *_
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_sched), __pyx_ptype_5numpy_ndarray, 1, "sched", 0))) __PYX_ERR(0, 19, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_svec), __pyx_ptype_5numpy_ndarray, 1, "svec", 0))) __PYX_ERR(0, 21, __pyx_L1_error)
-  __pyx_r = __pyx_pf_7solvers_2sa_Anneal(__pyx_self, __pyx_v_sched, __pyx_v_mcsteps, __pyx_v_svec, __pyx_v_nbs, __pyx_v_rng);
+  __pyx_r = __pyx_pf_7solvers_2sa_Anneal(__pyx_self, __pyx_v_sched, __pyx_v_mcsteps, __pyx_v_svec, __pyx_v_nbs);
 
   /* function exit code */
   goto __pyx_L0;
@@ -3196,7 +3238,7 @@ static PyObject *__pyx_pw_7solvers_2sa_1Anneal(PyObject *__pyx_self, PyObject *_
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7solvers_2sa_Anneal(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_sched, int __pyx_v_mcsteps, PyArrayObject *__pyx_v_svec, __Pyx_memviewslice __pyx_v_nbs, PyObject *__pyx_v_rng) {
+static PyObject *__pyx_pf_7solvers_2sa_Anneal(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_sched, int __pyx_v_mcsteps, PyArrayObject *__pyx_v_svec, __Pyx_memviewslice __pyx_v_nbs) {
   __Pyx_LocalBuf_ND __pyx_pybuffernd_sched;
   __Pyx_Buffer __pyx_pybuffer_sched;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_svec;
@@ -3225,7 +3267,7 @@ static PyObject *__pyx_pf_7solvers_2sa_Anneal(CYTHON_UNUSED PyObject *__pyx_self
   __pyx_pybuffernd_svec.diminfo[0].strides = __pyx_pybuffernd_svec.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_svec.diminfo[0].shape = __pyx_pybuffernd_svec.rcbuffer->pybuffer.shape[0];
   __Pyx_XDECREF(__pyx_r);
   if (unlikely(!__pyx_v_nbs.memview)) { __Pyx_RaiseUnboundLocalError("nbs"); __PYX_ERR(0, 19, __pyx_L1_error) }
-  __pyx_t_1 = __pyx_f_7solvers_2sa_Anneal(__pyx_v_sched, __pyx_v_mcsteps, __pyx_v_svec, __pyx_v_nbs, __pyx_v_rng, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_7solvers_2sa_Anneal(__pyx_v_sched, __pyx_v_mcsteps, __pyx_v_svec, __pyx_v_nbs, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3254,7 +3296,7 @@ static PyObject *__pyx_pf_7solvers_2sa_Anneal(CYTHON_UNUSED PyObject *__pyx_self
   return __pyx_r;
 }
 
-/* "solvers/sa.pyx":95
+/* "solvers/sa.pyx":108
  * @cython.embedsignature(True)
  * @cython.cdivision(True)
  * cpdef Anneal_parallel(np.float_t[:] sched,             # <<<<<<<<<<<<<<
@@ -3339,23 +3381,23 @@ static PyObject *__pyx_f_7solvers_2sa_Anneal_parallel(__Pyx_memviewslice __pyx_v
   __pyx_pybuffernd_ispins.data = NULL;
   __pyx_pybuffernd_ispins.rcbuffer = &__pyx_pybuffer_ispins;
 
-  /* "solvers/sa.pyx":126
+  /* "solvers/sa.pyx":139
  *     """
  *     # Define some variables
  *     cdef int nspins = svec.size             # <<<<<<<<<<<<<<
  *     cdef int maxnb = nbs[0].shape[0]
  *     cdef int schedsize = sched.size
  */
-  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_svec, 1, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_5numpy_int_t, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_5numpy_int_t, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 126, __pyx_L1_error)
+  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_svec, 1, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_5numpy_int_t, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_5numpy_int_t, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 139, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_size); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 126, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_size); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 139, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 126, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 139, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_nspins = __pyx_t_3;
 
-  /* "solvers/sa.pyx":127
+  /* "solvers/sa.pyx":140
  *     # Define some variables
  *     cdef int nspins = svec.size
  *     cdef int maxnb = nbs[0].shape[0]             # <<<<<<<<<<<<<<
@@ -3368,7 +3410,7 @@ static PyObject *__pyx_f_7solvers_2sa_Anneal_parallel(__Pyx_memviewslice __pyx_v
   {
     Py_ssize_t __pyx_tmp_idx = 0;
     Py_ssize_t __pyx_tmp_stride = __pyx_v_nbs.strides[0];
-        if ((0)) __PYX_ERR(0, 127, __pyx_L1_error)
+        if ((0)) __PYX_ERR(0, 140, __pyx_L1_error)
         __pyx_t_4.data += __pyx_tmp_idx * __pyx_tmp_stride;
 }
 
@@ -3385,23 +3427,23 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
   __pyx_t_4.memview = NULL;
   __pyx_t_4.data = NULL;
 
-  /* "solvers/sa.pyx":128
+  /* "solvers/sa.pyx":141
  *     cdef int nspins = svec.size
  *     cdef int maxnb = nbs[0].shape[0]
  *     cdef int schedsize = sched.size             # <<<<<<<<<<<<<<
  *     cdef int itemp = 0
  *     cdef double temp = 0.0
  */
-  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_v_sched, 1, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_5numpy_float_t, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_5numpy_float_t, 0);; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_v_sched, 1, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_5numpy_float_t, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_5numpy_float_t, 0);; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 141, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_size); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_size); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 141, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 141, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_schedsize = __pyx_t_3;
 
-  /* "solvers/sa.pyx":129
+  /* "solvers/sa.pyx":142
  *     cdef int maxnb = nbs[0].shape[0]
  *     cdef int schedsize = sched.size
  *     cdef int itemp = 0             # <<<<<<<<<<<<<<
@@ -3410,7 +3452,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
  */
   __pyx_v_itemp = 0;
 
-  /* "solvers/sa.pyx":130
+  /* "solvers/sa.pyx":143
  *     cdef int schedsize = sched.size
  *     cdef int itemp = 0
  *     cdef double temp = 0.0             # <<<<<<<<<<<<<<
@@ -3419,7 +3461,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
  */
   __pyx_v_temp = 0.0;
 
-  /* "solvers/sa.pyx":131
+  /* "solvers/sa.pyx":144
  *     cdef int itemp = 0
  *     cdef double temp = 0.0
  *     cdef int step = 0             # <<<<<<<<<<<<<<
@@ -3428,7 +3470,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
  */
   __pyx_v_step = 0;
 
-  /* "solvers/sa.pyx":132
+  /* "solvers/sa.pyx":145
  *     cdef double temp = 0.0
  *     cdef int step = 0
  *     cdef int sidx = 0             # <<<<<<<<<<<<<<
@@ -3437,7 +3479,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
  */
   __pyx_v_sidx = 0;
 
-  /* "solvers/sa.pyx":133
+  /* "solvers/sa.pyx":146
  *     cdef int step = 0
  *     cdef int sidx = 0
  *     cdef int si = 0             # <<<<<<<<<<<<<<
@@ -3446,7 +3488,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
  */
   __pyx_v_si = 0;
 
-  /* "solvers/sa.pyx":134
+  /* "solvers/sa.pyx":147
  *     cdef int sidx = 0
  *     cdef int si = 0
  *     cdef int ispin = 0             # <<<<<<<<<<<<<<
@@ -3455,7 +3497,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
  */
   __pyx_v_ispin = 0;
 
-  /* "solvers/sa.pyx":135
+  /* "solvers/sa.pyx":148
  *     cdef int si = 0
  *     cdef int ispin = 0
  *     cdef int spinidx = 0             # <<<<<<<<<<<<<<
@@ -3464,7 +3506,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
  */
   __pyx_v_spinidx = 0;
 
-  /* "solvers/sa.pyx":136
+  /* "solvers/sa.pyx":149
  *     cdef int ispin = 0
  *     cdef int spinidx = 0
  *     cdef double jval = 0.0             # <<<<<<<<<<<<<<
@@ -3473,19 +3515,19 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
  */
   __pyx_v_jval = 0.0;
 
-  /* "solvers/sa.pyx":137
+  /* "solvers/sa.pyx":150
  *     cdef int spinidx = 0
  *     cdef double jval = 0.0
  *     cdef np.ndarray[np.float_t, ndim=1] ediffs = np.zeros(nspins)             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.int_t, ndim=1] ispins = np.arange(nspins)
  *     cdef int t = 0
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 150, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 150, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_nspins); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_nspins); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 150, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_6 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_5))) {
@@ -3500,16 +3542,16 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
   __pyx_t_1 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_6, __pyx_t_2) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_2);
   __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 137, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 150, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 137, __pyx_L1_error)
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 150, __pyx_L1_error)
   __pyx_t_7 = ((PyArrayObject *)__pyx_t_1);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_ediffs.rcbuffer->pybuffer, (PyObject*)__pyx_t_7, &__Pyx_TypeInfo_nn___pyx_t_5numpy_float_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 1, 0, __pyx_stack) == -1)) {
       __pyx_v_ediffs = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(0, 137, __pyx_L1_error)
+      __PYX_ERR(0, 150, __pyx_L1_error)
     } else {__pyx_pybuffernd_ediffs.diminfo[0].strides = __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_ediffs.diminfo[0].shape = __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.shape[0];
     }
   }
@@ -3517,19 +3559,19 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
   __pyx_v_ediffs = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "solvers/sa.pyx":138
+  /* "solvers/sa.pyx":151
  *     cdef double jval = 0.0
  *     cdef np.ndarray[np.float_t, ndim=1] ediffs = np.zeros(nspins)
  *     cdef np.ndarray[np.int_t, ndim=1] ispins = np.arange(nspins)             # <<<<<<<<<<<<<<
  *     cdef int t = 0
  *     cdef int i = 0
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 138, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 151, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_arange); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 138, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_arange); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 151, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_nspins); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 138, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_nspins); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 151, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_6 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -3544,16 +3586,16 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
   __pyx_t_1 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_2, __pyx_t_6, __pyx_t_5) : __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 138, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 151, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 138, __pyx_L1_error)
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 151, __pyx_L1_error)
   __pyx_t_8 = ((PyArrayObject *)__pyx_t_1);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_ispins.rcbuffer->pybuffer, (PyObject*)__pyx_t_8, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 1, 0, __pyx_stack) == -1)) {
       __pyx_v_ispins = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf = NULL;
-      __PYX_ERR(0, 138, __pyx_L1_error)
+      __PYX_ERR(0, 151, __pyx_L1_error)
     } else {__pyx_pybuffernd_ispins.diminfo[0].strides = __pyx_pybuffernd_ispins.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_ispins.diminfo[0].shape = __pyx_pybuffernd_ispins.rcbuffer->pybuffer.shape[0];
     }
   }
@@ -3561,7 +3603,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
   __pyx_v_ispins = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "solvers/sa.pyx":139
+  /* "solvers/sa.pyx":152
  *     cdef np.ndarray[np.float_t, ndim=1] ediffs = np.zeros(nspins)
  *     cdef np.ndarray[np.int_t, ndim=1] ispins = np.arange(nspins)
  *     cdef int t = 0             # <<<<<<<<<<<<<<
@@ -3570,7 +3612,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
  */
   __pyx_v_t = 0;
 
-  /* "solvers/sa.pyx":140
+  /* "solvers/sa.pyx":153
  *     cdef np.ndarray[np.int_t, ndim=1] ispins = np.arange(nspins)
  *     cdef int t = 0
  *     cdef int i = 0             # <<<<<<<<<<<<<<
@@ -3579,7 +3621,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
  */
   __pyx_v_i = 0;
 
-  /* "solvers/sa.pyx":141
+  /* "solvers/sa.pyx":154
  *     cdef int t = 0
  *     cdef int i = 0
  *     cdef int j = 0             # <<<<<<<<<<<<<<
@@ -3588,7 +3630,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
  */
   __pyx_v_j = 0;
 
-  /* "solvers/sa.pyx":143
+  /* "solvers/sa.pyx":156
  *     cdef int j = 0
  * 
  *     with nogil, parallel(num_threads=nthreads):             # <<<<<<<<<<<<<<
@@ -3621,7 +3663,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                 __pyx_v_t = ((int)0xbad0bad0);
                 __pyx_v_temp = ((double)__PYX_NAN());
 
-                /* "solvers/sa.pyx":145
+                /* "solvers/sa.pyx":158
  *     with nogil, parallel(num_threads=nthreads):
  *         # Loop over temperatures
  *         for itemp in xrange(schedsize):             # <<<<<<<<<<<<<<
@@ -3633,7 +3675,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                 for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
                   __pyx_v_itemp = __pyx_t_10;
 
-                  /* "solvers/sa.pyx":147
+                  /* "solvers/sa.pyx":160
  *         for itemp in xrange(schedsize):
  *             # Get temperature
  *             temp = sched[itemp]             # <<<<<<<<<<<<<<
@@ -3643,7 +3685,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                   __pyx_t_11 = __pyx_v_itemp;
                   __pyx_v_temp = (*((__pyx_t_5numpy_float_t *) ( /* dim=0 */ (__pyx_v_sched.data + __pyx_t_11 * __pyx_v_sched.strides[0]) )));
 
-                  /* "solvers/sa.pyx":149
+                  /* "solvers/sa.pyx":162
  *             temp = sched[itemp]
  *             # Do some number of Monte Carlo steps
  *             for step in xrange(mcsteps):             # <<<<<<<<<<<<<<
@@ -3655,7 +3697,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                   for (__pyx_t_14 = 0; __pyx_t_14 < __pyx_t_13; __pyx_t_14+=1) {
                     __pyx_v_step = __pyx_t_14;
 
-                    /* "solvers/sa.pyx":152
+                    /* "solvers/sa.pyx":165
  *                 # Fisher-Yates shuffling algorithm
  *                 # cannot use numpy.random.permutation due to nogil
  *                 for i in xrange(nspins):             # <<<<<<<<<<<<<<
@@ -3667,7 +3709,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                     for (__pyx_t_17 = 0; __pyx_t_17 < __pyx_t_16; __pyx_t_17+=1) {
                       __pyx_v_i = __pyx_t_17;
 
-                      /* "solvers/sa.pyx":153
+                      /* "solvers/sa.pyx":166
  *                 # cannot use numpy.random.permutation due to nogil
  *                 for i in xrange(nspins):
  *                     ispins[i] = i             # <<<<<<<<<<<<<<
@@ -3678,7 +3720,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                       *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_18, __pyx_pybuffernd_ispins.diminfo[0].strides) = __pyx_v_i;
                     }
 
-                    /* "solvers/sa.pyx":154
+                    /* "solvers/sa.pyx":167
  *                 for i in xrange(nspins):
  *                     ispins[i] = i
  *                 for i in xrange(nspins, 0, -1):             # <<<<<<<<<<<<<<
@@ -3688,7 +3730,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                     for (__pyx_t_15 = __pyx_v_nspins; __pyx_t_15 > 0; __pyx_t_15-=1) {
                       __pyx_v_i = __pyx_t_15;
 
-                      /* "solvers/sa.pyx":155
+                      /* "solvers/sa.pyx":168
  *                     ispins[i] = i
  *                 for i in xrange(nspins, 0, -1):
  *                     j = crand() % i             # <<<<<<<<<<<<<<
@@ -3697,7 +3739,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
  */
                       __pyx_v_j = (rand() % __pyx_v_i);
 
-                      /* "solvers/sa.pyx":156
+                      /* "solvers/sa.pyx":169
  *                 for i in xrange(nspins, 0, -1):
  *                     j = crand() % i
  *                     t = ispins[i-1]             # <<<<<<<<<<<<<<
@@ -3707,7 +3749,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                       __pyx_t_19 = (__pyx_v_i - 1);
                       __pyx_v_t = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_19, __pyx_pybuffernd_ispins.diminfo[0].strides));
 
-                      /* "solvers/sa.pyx":157
+                      /* "solvers/sa.pyx":170
  *                     j = crand() % i
  *                     t = ispins[i-1]
  *                     ispins[i-1] = ispins[j]             # <<<<<<<<<<<<<<
@@ -3718,7 +3760,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                       __pyx_t_21 = (__pyx_v_i - 1);
                       *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_21, __pyx_pybuffernd_ispins.diminfo[0].strides) = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_ispins.diminfo[0].strides));
 
-                      /* "solvers/sa.pyx":158
+                      /* "solvers/sa.pyx":171
  *                     t = ispins[i-1]
  *                     ispins[i-1] = ispins[j]
  *                     ispins[j] = t             # <<<<<<<<<<<<<<
@@ -3729,7 +3771,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                       *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_ispins.diminfo[0].strides) = __pyx_v_t;
                     }
 
-                    /* "solvers/sa.pyx":160
+                    /* "solvers/sa.pyx":173
  *                     ispins[j] = t
  *                 # Loop over spins
  *                 for ispin in prange(nspins, schedule='static'):             # <<<<<<<<<<<<<<
@@ -3754,7 +3796,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                                     __pyx_v_sidx = ((int)0xbad0bad0);
                                     __pyx_v_spinidx = ((int)0xbad0bad0);
 
-                                    /* "solvers/sa.pyx":161
+                                    /* "solvers/sa.pyx":174
  *                 # Loop over spins
  *                 for ispin in prange(nspins, schedule='static'):
  *                     sidx = ispins[ispin]             # <<<<<<<<<<<<<<
@@ -3764,7 +3806,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                                     __pyx_t_23 = __pyx_v_ispin;
                                     __pyx_v_sidx = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_ispins.rcbuffer->pybuffer.buf, __pyx_t_23, __pyx_pybuffernd_ispins.diminfo[0].strides));
 
-                                    /* "solvers/sa.pyx":162
+                                    /* "solvers/sa.pyx":175
  *                 for ispin in prange(nspins, schedule='static'):
  *                     sidx = ispins[ispin]
  *                     ediffs[sidx] = 0.0  # reset             # <<<<<<<<<<<<<<
@@ -3774,7 +3816,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                                     __pyx_t_24 = __pyx_v_sidx;
                                     *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float_t *, __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.buf, __pyx_t_24, __pyx_pybuffernd_ediffs.diminfo[0].strides) = 0.0;
 
-                                    /* "solvers/sa.pyx":164
+                                    /* "solvers/sa.pyx":177
  *                     ediffs[sidx] = 0.0  # reset
  *                     # loop through the neighbors
  *                     for si in xrange(maxnb):             # <<<<<<<<<<<<<<
@@ -3786,7 +3828,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                                     for (__pyx_t_27 = 0; __pyx_t_27 < __pyx_t_26; __pyx_t_27+=1) {
                                       __pyx_v_si = __pyx_t_27;
 
-                                      /* "solvers/sa.pyx":166
+                                      /* "solvers/sa.pyx":179
  *                     for si in xrange(maxnb):
  *                         # get the neighbor spin index
  *                         spinidx = int(nbs[sidx, si, 0])             # <<<<<<<<<<<<<<
@@ -3798,7 +3840,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                                       __pyx_t_30 = 0;
                                       __pyx_v_spinidx = ((int)(*((__pyx_t_5numpy_float_t *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_nbs.data + __pyx_t_28 * __pyx_v_nbs.strides[0]) ) + __pyx_t_29 * __pyx_v_nbs.strides[1]) ) + __pyx_t_30 * __pyx_v_nbs.strides[2]) ))));
 
-                                      /* "solvers/sa.pyx":168
+                                      /* "solvers/sa.pyx":181
  *                         spinidx = int(nbs[sidx, si, 0])
  *                         # get the coupling value to that neighbor
  *                         jval = nbs[sidx, si, 1]             # <<<<<<<<<<<<<<
@@ -3810,7 +3852,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                                       __pyx_t_33 = 1;
                                       __pyx_v_jval = (*((__pyx_t_5numpy_float_t *) ( /* dim=2 */ (( /* dim=1 */ (( /* dim=0 */ (__pyx_v_nbs.data + __pyx_t_31 * __pyx_v_nbs.strides[0]) ) + __pyx_t_32 * __pyx_v_nbs.strides[1]) ) + __pyx_t_33 * __pyx_v_nbs.strides[2]) )));
 
-                                      /* "solvers/sa.pyx":170
+                                      /* "solvers/sa.pyx":183
  *                         jval = nbs[sidx, si, 1]
  *                         # self-connections are not quadratic
  *                         if spinidx == sidx:             # <<<<<<<<<<<<<<
@@ -3820,7 +3862,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                                       __pyx_t_34 = ((__pyx_v_spinidx == __pyx_v_sidx) != 0);
                                       if (__pyx_t_34) {
 
-                                        /* "solvers/sa.pyx":171
+                                        /* "solvers/sa.pyx":184
  *                         # self-connections are not quadratic
  *                         if spinidx == sidx:
  *                             ediffs[sidx] += -2.0*svec[sidx]*jval             # <<<<<<<<<<<<<<
@@ -3831,7 +3873,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                                         __pyx_t_36 = __pyx_v_sidx;
                                         *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float_t *, __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.buf, __pyx_t_36, __pyx_pybuffernd_ediffs.diminfo[0].strides) += ((-2.0 * (*((__pyx_t_5numpy_int_t *) ( /* dim=0 */ (__pyx_v_svec.data + __pyx_t_35 * __pyx_v_svec.strides[0]) )))) * __pyx_v_jval);
 
-                                        /* "solvers/sa.pyx":170
+                                        /* "solvers/sa.pyx":183
  *                         jval = nbs[sidx, si, 1]
  *                         # self-connections are not quadratic
  *                         if spinidx == sidx:             # <<<<<<<<<<<<<<
@@ -3841,7 +3883,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                                         goto __pyx_L24;
                                       }
 
-                                      /* "solvers/sa.pyx":173
+                                      /* "solvers/sa.pyx":186
  *                             ediffs[sidx] += -2.0*svec[sidx]*jval
  *                         else:
  *                             ediffs[sidx] += -2.0*svec[sidx]*(jval*svec[spinidx])             # <<<<<<<<<<<<<<
@@ -3857,7 +3899,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                                       __pyx_L24:;
                                     }
 
-                                    /* "solvers/sa.pyx":175
+                                    /* "solvers/sa.pyx":188
  *                             ediffs[sidx] += -2.0*svec[sidx]*(jval*svec[spinidx])
  *                     # Accept or reject
  *                     if ediffs[sidx] <= 0.0:  # avoid overflow             # <<<<<<<<<<<<<<
@@ -3868,7 +3910,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                                     __pyx_t_34 = (((*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float_t *, __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.buf, __pyx_t_40, __pyx_pybuffernd_ediffs.diminfo[0].strides)) <= 0.0) != 0);
                                     if (__pyx_t_34) {
 
-                                      /* "solvers/sa.pyx":176
+                                      /* "solvers/sa.pyx":189
  *                     # Accept or reject
  *                     if ediffs[sidx] <= 0.0:  # avoid overflow
  *                         svec[sidx] *= -1             # <<<<<<<<<<<<<<
@@ -3878,7 +3920,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                                       __pyx_t_41 = __pyx_v_sidx;
                                       *((__pyx_t_5numpy_int_t *) ( /* dim=0 */ (__pyx_v_svec.data + __pyx_t_41 * __pyx_v_svec.strides[0]) )) *= -1L;
 
-                                      /* "solvers/sa.pyx":175
+                                      /* "solvers/sa.pyx":188
  *                             ediffs[sidx] += -2.0*svec[sidx]*(jval*svec[spinidx])
  *                     # Accept or reject
  *                     if ediffs[sidx] <= 0.0:  # avoid overflow             # <<<<<<<<<<<<<<
@@ -3888,7 +3930,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                                       goto __pyx_L25;
                                     }
 
-                                    /* "solvers/sa.pyx":177
+                                    /* "solvers/sa.pyx":190
  *                     if ediffs[sidx] <= 0.0:  # avoid overflow
  *                         svec[sidx] *= -1
  *                     elif cexp(-1.0*ediffs[sidx]/temp) > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
@@ -3898,7 +3940,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                                     __pyx_t_34 = ((exp(((-1.0 * (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float_t *, __pyx_pybuffernd_ediffs.rcbuffer->pybuffer.buf, __pyx_t_42, __pyx_pybuffernd_ediffs.diminfo[0].strides))) / __pyx_v_temp)) > (rand() / ((double)RAND_MAX))) != 0);
                                     if (__pyx_t_34) {
 
-                                      /* "solvers/sa.pyx":178
+                                      /* "solvers/sa.pyx":191
  *                         svec[sidx] *= -1
  *                     elif cexp(-1.0*ediffs[sidx]/temp) > crand()/float(RAND_MAX):
  *                         svec[sidx] *= -1             # <<<<<<<<<<<<<<
@@ -3906,7 +3948,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
                                       __pyx_t_43 = __pyx_v_sidx;
                                       *((__pyx_t_5numpy_int_t *) ( /* dim=0 */ (__pyx_v_svec.data + __pyx_t_43 * __pyx_v_svec.strides[0]) )) *= -1L;
 
-                                      /* "solvers/sa.pyx":177
+                                      /* "solvers/sa.pyx":190
  *                     if ediffs[sidx] <= 0.0:  # avoid overflow
  *                         svec[sidx] *= -1
  *                     elif cexp(-1.0*ediffs[sidx]/temp) > crand()/float(RAND_MAX):             # <<<<<<<<<<<<<<
@@ -3930,7 +3972,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
         #endif
       }
 
-      /* "solvers/sa.pyx":143
+      /* "solvers/sa.pyx":156
  *     cdef int j = 0
  * 
  *     with nogil, parallel(num_threads=nthreads):             # <<<<<<<<<<<<<<
@@ -3949,7 +3991,7 @@ __pyx_v_maxnb = (__pyx_t_4.shape[0]);
       }
   }
 
-  /* "solvers/sa.pyx":95
+  /* "solvers/sa.pyx":108
  * @cython.embedsignature(True)
  * @cython.cdivision(True)
  * cpdef Anneal_parallel(np.float_t[:] sched,             # <<<<<<<<<<<<<<
@@ -4028,29 +4070,29 @@ static PyObject *__pyx_pw_7solvers_2sa_3Anneal_parallel(PyObject *__pyx_self, Py
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_mcsteps)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("Anneal_parallel", 1, 5, 5, 1); __PYX_ERR(0, 95, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("Anneal_parallel", 1, 5, 5, 1); __PYX_ERR(0, 108, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_svec)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("Anneal_parallel", 1, 5, 5, 2); __PYX_ERR(0, 95, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("Anneal_parallel", 1, 5, 5, 2); __PYX_ERR(0, 108, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_nbs)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("Anneal_parallel", 1, 5, 5, 3); __PYX_ERR(0, 95, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("Anneal_parallel", 1, 5, 5, 3); __PYX_ERR(0, 108, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_nthreads)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("Anneal_parallel", 1, 5, 5, 4); __PYX_ERR(0, 95, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("Anneal_parallel", 1, 5, 5, 4); __PYX_ERR(0, 108, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "Anneal_parallel") < 0)) __PYX_ERR(0, 95, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "Anneal_parallel") < 0)) __PYX_ERR(0, 108, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 5) {
       goto __pyx_L5_argtuple_error;
@@ -4061,15 +4103,15 @@ static PyObject *__pyx_pw_7solvers_2sa_3Anneal_parallel(PyObject *__pyx_self, Py
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
       values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
     }
-    __pyx_v_sched = __Pyx_PyObject_to_MemoryviewSlice_ds_nn___pyx_t_5numpy_float_t(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_sched.memview)) __PYX_ERR(0, 95, __pyx_L3_error)
-    __pyx_v_mcsteps = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_mcsteps == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L3_error)
-    __pyx_v_svec = __Pyx_PyObject_to_MemoryviewSlice_ds_nn___pyx_t_5numpy_int_t(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_svec.memview)) __PYX_ERR(0, 97, __pyx_L3_error)
-    __pyx_v_nbs = __Pyx_PyObject_to_MemoryviewSlice_dsdsds_nn___pyx_t_5numpy_float_t(values[3], PyBUF_WRITABLE); if (unlikely(!__pyx_v_nbs.memview)) __PYX_ERR(0, 98, __pyx_L3_error)
-    __pyx_v_nthreads = __Pyx_PyInt_As_int(values[4]); if (unlikely((__pyx_v_nthreads == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L3_error)
+    __pyx_v_sched = __Pyx_PyObject_to_MemoryviewSlice_ds_nn___pyx_t_5numpy_float_t(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_sched.memview)) __PYX_ERR(0, 108, __pyx_L3_error)
+    __pyx_v_mcsteps = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_mcsteps == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 109, __pyx_L3_error)
+    __pyx_v_svec = __Pyx_PyObject_to_MemoryviewSlice_ds_nn___pyx_t_5numpy_int_t(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_svec.memview)) __PYX_ERR(0, 110, __pyx_L3_error)
+    __pyx_v_nbs = __Pyx_PyObject_to_MemoryviewSlice_dsdsds_nn___pyx_t_5numpy_float_t(values[3], PyBUF_WRITABLE); if (unlikely(!__pyx_v_nbs.memview)) __PYX_ERR(0, 111, __pyx_L3_error)
+    __pyx_v_nthreads = __Pyx_PyInt_As_int(values[4]); if (unlikely((__pyx_v_nthreads == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 112, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("Anneal_parallel", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 95, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("Anneal_parallel", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 108, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("solvers.sa.Anneal_parallel", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -4088,10 +4130,10 @@ static PyObject *__pyx_pf_7solvers_2sa_2Anneal_parallel(CYTHON_UNUSED PyObject *
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("Anneal_parallel", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_sched.memview)) { __Pyx_RaiseUnboundLocalError("sched"); __PYX_ERR(0, 95, __pyx_L1_error) }
-  if (unlikely(!__pyx_v_svec.memview)) { __Pyx_RaiseUnboundLocalError("svec"); __PYX_ERR(0, 95, __pyx_L1_error) }
-  if (unlikely(!__pyx_v_nbs.memview)) { __Pyx_RaiseUnboundLocalError("nbs"); __PYX_ERR(0, 95, __pyx_L1_error) }
-  __pyx_t_1 = __pyx_f_7solvers_2sa_Anneal_parallel(__pyx_v_sched, __pyx_v_mcsteps, __pyx_v_svec, __pyx_v_nbs, __pyx_v_nthreads, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 95, __pyx_L1_error)
+  if (unlikely(!__pyx_v_sched.memview)) { __Pyx_RaiseUnboundLocalError("sched"); __PYX_ERR(0, 108, __pyx_L1_error) }
+  if (unlikely(!__pyx_v_svec.memview)) { __Pyx_RaiseUnboundLocalError("svec"); __PYX_ERR(0, 108, __pyx_L1_error) }
+  if (unlikely(!__pyx_v_nbs.memview)) { __Pyx_RaiseUnboundLocalError("nbs"); __PYX_ERR(0, 108, __pyx_L1_error) }
+  __pyx_t_1 = __pyx_f_7solvers_2sa_Anneal_parallel(__pyx_v_sched, __pyx_v_mcsteps, __pyx_v_svec, __pyx_v_nbs, __pyx_v_nthreads, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -20186,7 +20228,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_numpy_core_umath_failed_to_impor, __pyx_k_numpy_core_umath_failed_to_impor, sizeof(__pyx_k_numpy_core_umath_failed_to_impor), 0, 0, 1, 0},
   {&__pyx_n_s_obj, __pyx_k_obj, sizeof(__pyx_k_obj), 0, 0, 1, 1},
   {&__pyx_n_s_pack, __pyx_k_pack, sizeof(__pyx_k_pack), 0, 0, 1, 1},
-  {&__pyx_n_s_permutation, __pyx_k_permutation, sizeof(__pyx_k_permutation), 0, 0, 1, 1},
   {&__pyx_n_s_pickle, __pyx_k_pickle, sizeof(__pyx_k_pickle), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_PickleError, __pyx_k_pyx_PickleError, sizeof(__pyx_k_pyx_PickleError), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_checksum, __pyx_k_pyx_checksum, sizeof(__pyx_k_pyx_checksum), 0, 0, 1, 1},
@@ -20200,7 +20241,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_reduce, __pyx_k_reduce, sizeof(__pyx_k_reduce), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_cython, __pyx_k_reduce_cython, sizeof(__pyx_k_reduce_cython), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_ex, __pyx_k_reduce_ex, sizeof(__pyx_k_reduce_ex), 0, 0, 1, 1},
-  {&__pyx_n_s_rng, __pyx_k_rng, sizeof(__pyx_k_rng), 0, 0, 1, 1},
   {&__pyx_n_s_sched, __pyx_k_sched, sizeof(__pyx_k_sched), 0, 0, 1, 1},
   {&__pyx_n_s_setstate, __pyx_k_setstate, sizeof(__pyx_k_setstate), 0, 0, 1, 1},
   {&__pyx_n_s_setstate_cython, __pyx_k_setstate_cython, sizeof(__pyx_k_setstate_cython), 0, 0, 1, 1},
@@ -20226,13 +20266,13 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 60, __pyx_L1_error)
   #if PY_MAJOR_VERSION >= 3
-  __pyx_builtin_xrange = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_xrange) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_builtin_xrange = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_xrange) __PYX_ERR(0, 66, __pyx_L1_error)
   #else
-  __pyx_builtin_xrange = __Pyx_GetBuiltinName(__pyx_n_s_xrange); if (!__pyx_builtin_xrange) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_builtin_xrange = __Pyx_GetBuiltinName(__pyx_n_s_xrange); if (!__pyx_builtin_xrange) __PYX_ERR(0, 66, __pyx_L1_error)
   #endif
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(1, 272, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(1, 285, __pyx_L1_error)
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) __PYX_ERR(1, 856, __pyx_L1_error)
   __pyx_builtin_ImportError = __Pyx_GetBuiltinName(__pyx_n_s_ImportError); if (!__pyx_builtin_ImportError) __PYX_ERR(1, 1038, __pyx_L1_error)
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(2, 148, __pyx_L1_error)
@@ -21898,6 +21938,67 @@ static CYTHON_INLINE void __Pyx_XDEC_MEMVIEW(__Pyx_memviewslice *memslice,
     }
 }
 
+/* PyDictVersioning */
+  #if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj) {
+    PyObject *dict = Py_TYPE(obj)->tp_dict;
+    return likely(dict) ? __PYX_GET_DICT_VERSION(dict) : 0;
+}
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj) {
+    PyObject **dictptr = NULL;
+    Py_ssize_t offset = Py_TYPE(obj)->tp_dictoffset;
+    if (offset) {
+#if CYTHON_COMPILING_IN_CPYTHON
+        dictptr = (likely(offset > 0)) ? (PyObject **) ((char *)obj + offset) : _PyObject_GetDictPtr(obj);
+#else
+        dictptr = _PyObject_GetDictPtr(obj);
+#endif
+    }
+    return (dictptr && *dictptr) ? __PYX_GET_DICT_VERSION(*dictptr) : 0;
+}
+static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version) {
+    PyObject *dict = Py_TYPE(obj)->tp_dict;
+    if (unlikely(!dict) || unlikely(tp_dict_version != __PYX_GET_DICT_VERSION(dict)))
+        return 0;
+    return obj_dict_version == __Pyx_get_object_dict_version(obj);
+}
+#endif
+
+/* GetModuleGlobalName */
+  #if CYTHON_USE_DICT_VERSIONS
+static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_version, PyObject **dict_cached_value)
+#else
+static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name)
+#endif
+{
+    PyObject *result;
+#if !CYTHON_AVOID_BORROWED_REFS
+#if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030500A1
+    result = _PyDict_GetItem_KnownHash(__pyx_d, name, ((PyASCIIObject *) name)->hash);
+    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
+    if (likely(result)) {
+        return __Pyx_NewRef(result);
+    } else if (unlikely(PyErr_Occurred())) {
+        return NULL;
+    }
+#else
+    result = PyDict_GetItem(__pyx_d, name);
+    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
+    if (likely(result)) {
+        return __Pyx_NewRef(result);
+    }
+#endif
+#else
+    result = PyObject_GetItem(__pyx_d, name);
+    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
+    if (likely(result)) {
+        return __Pyx_NewRef(result);
+    }
+    PyErr_Clear();
+#endif
+    return __Pyx_GetBuiltinName(name);
+}
+
 /* PyCFunctionFastCall */
   #if CYTHON_FAST_PYCCALL
 static CYTHON_INLINE PyObject * __Pyx_PyCFunction_FastCall(PyObject *func_obj, PyObject **args, Py_ssize_t nargs) {
@@ -22060,6 +22161,35 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg
 }
 #endif
 
+/* PyObjectCall2Args */
+  static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2) {
+    PyObject *args, *result = NULL;
+    #if CYTHON_FAST_PYCALL
+    if (PyFunction_Check(function)) {
+        PyObject *args[2] = {arg1, arg2};
+        return __Pyx_PyFunction_FastCall(function, args, 2);
+    }
+    #endif
+    #if CYTHON_FAST_PYCCALL
+    if (__Pyx_PyFastCFunction_Check(function)) {
+        PyObject *args[2] = {arg1, arg2};
+        return __Pyx_PyCFunction_FastCall(function, args, 2);
+    }
+    #endif
+    args = PyTuple_New(2);
+    if (unlikely(!args)) goto done;
+    Py_INCREF(arg1);
+    PyTuple_SET_ITEM(args, 0, arg1);
+    Py_INCREF(arg2);
+    PyTuple_SET_ITEM(args, 1, arg2);
+    Py_INCREF(function);
+    result = __Pyx_PyObject_Call(function, args, NULL);
+    Py_DECREF(args);
+    Py_DECREF(function);
+done:
+    return result;
+}
+
 /* PyObjectCallMethO */
   #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg) {
@@ -22120,35 +22250,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObjec
 }
 #endif
 
-/* PyObjectCall2Args */
-  static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2) {
-    PyObject *args, *result = NULL;
-    #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(function)) {
-        PyObject *args[2] = {arg1, arg2};
-        return __Pyx_PyFunction_FastCall(function, args, 2);
-    }
-    #endif
-    #if CYTHON_FAST_PYCCALL
-    if (__Pyx_PyFastCFunction_Check(function)) {
-        PyObject *args[2] = {arg1, arg2};
-        return __Pyx_PyCFunction_FastCall(function, args, 2);
-    }
-    #endif
-    args = PyTuple_New(2);
-    if (unlikely(!args)) goto done;
-    Py_INCREF(arg1);
-    PyTuple_SET_ITEM(args, 0, arg1);
-    Py_INCREF(arg2);
-    PyTuple_SET_ITEM(args, 1, arg2);
-    Py_INCREF(function);
-    result = __Pyx_PyObject_Call(function, args, NULL);
-    Py_DECREF(args);
-    Py_DECREF(function);
-done:
-    return result;
-}
-
 /* ExtTypeTest */
   static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type) {
     if (unlikely(!type)) {
@@ -22160,12 +22261,6 @@ done:
     PyErr_Format(PyExc_TypeError, "Cannot convert %.200s to %.200s",
                  Py_TYPE(obj)->tp_name, type->tp_name);
     return 0;
-}
-
-/* BufferFallbackError */
-  static void __Pyx_RaiseBufferFallbackError(void) {
-  PyErr_SetString(PyExc_ValueError,
-     "Buffer acquisition failed on assignment; and then reacquiring the old buffer failed too!");
 }
 
 /* PyErrFetchRestore */
@@ -22358,67 +22453,6 @@ bad:
 /* None */
   static CYTHON_INLINE void __Pyx_RaiseUnboundLocalError(const char *varname) {
     PyErr_Format(PyExc_UnboundLocalError, "local variable '%s' referenced before assignment", varname);
-}
-
-/* PyDictVersioning */
-  #if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj) {
-    PyObject *dict = Py_TYPE(obj)->tp_dict;
-    return likely(dict) ? __PYX_GET_DICT_VERSION(dict) : 0;
-}
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj) {
-    PyObject **dictptr = NULL;
-    Py_ssize_t offset = Py_TYPE(obj)->tp_dictoffset;
-    if (offset) {
-#if CYTHON_COMPILING_IN_CPYTHON
-        dictptr = (likely(offset > 0)) ? (PyObject **) ((char *)obj + offset) : _PyObject_GetDictPtr(obj);
-#else
-        dictptr = _PyObject_GetDictPtr(obj);
-#endif
-    }
-    return (dictptr && *dictptr) ? __PYX_GET_DICT_VERSION(*dictptr) : 0;
-}
-static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version) {
-    PyObject *dict = Py_TYPE(obj)->tp_dict;
-    if (unlikely(!dict) || unlikely(tp_dict_version != __PYX_GET_DICT_VERSION(dict)))
-        return 0;
-    return obj_dict_version == __Pyx_get_object_dict_version(obj);
-}
-#endif
-
-/* GetModuleGlobalName */
-  #if CYTHON_USE_DICT_VERSIONS
-static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_version, PyObject **dict_cached_value)
-#else
-static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name)
-#endif
-{
-    PyObject *result;
-#if !CYTHON_AVOID_BORROWED_REFS
-#if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030500A1
-    result = _PyDict_GetItem_KnownHash(__pyx_d, name, ((PyASCIIObject *) name)->hash);
-    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
-    if (likely(result)) {
-        return __Pyx_NewRef(result);
-    } else if (unlikely(PyErr_Occurred())) {
-        return NULL;
-    }
-#else
-    result = PyDict_GetItem(__pyx_d, name);
-    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
-    if (likely(result)) {
-        return __Pyx_NewRef(result);
-    }
-#endif
-#else
-    result = PyObject_GetItem(__pyx_d, name);
-    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
-    if (likely(result)) {
-        return __Pyx_NewRef(result);
-    }
-    PyErr_Clear();
-#endif
-    return __Pyx_GetBuiltinName(name);
 }
 
 /* RaiseException */

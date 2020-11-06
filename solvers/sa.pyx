@@ -19,8 +19,7 @@ from libc.stdlib cimport RAND_MAX as RAND_MAX
 cpdef Anneal(np.ndarray[np.float64_t, ndim=1] sched,
              int mcsteps,
              np.ndarray[np.int_t, ndim=1] svec,
-             np.float64_t[:, :, :] nbs,
-             rng):
+             np.float64_t[:, :, :] nbs):
     """
     Execute thermal annealing according to @sched with @mcsteps
     sweeps for each annealing step. Starting configuration is 
@@ -57,35 +56,49 @@ cpdef Anneal(np.ndarray[np.float64_t, ndim=1] sched,
     cdef int spinidx = 0
     cdef double jval = 0.0
     cdef double ediff = 0.0
-    cdef np.ndarray[np.int_t, ndim=1] sidx_shuff = rng.permutation(range(nspins))
+    cdef np.ndarray[np.int_t, ndim=1] ispins = np.arange(nspins)
+    cdef int t = 0
+    cdef int i = 0
+    cdef int j = 0
+
     # Loop over temperatures
-    for itemp in xrange(schedsize):
-        # Get temperature
-        temp = sched[itemp]
-        # Do some number of Monte Carlo steps
-        for step in xrange(mcsteps):
-            # Loop over spins
-            for sidx in sidx_shuff:
-                # loop through the given spin's neighbors
-                for si in xrange(maxnb):
-                    # get the neighbor spin index
-                    spinidx = int(nbs[sidx,si,0])
-                    # get the coupling value to that neighbor
-                    jval = nbs[sidx,si,1]
-                    # self-connections are not quadratic
-                    if spinidx == sidx:
-                        ediff += -2.0*float(svec[sidx])*jval
-                    # calculate the energy diff of flipping this spin
-                    else:
-                        ediff += -2.0*float(svec[sidx])*(jval*float(svec[spinidx]))
-                # Metropolis accept or reject
-                if ediff <= 0.0:  # avoid overflow
-                    svec[sidx] *= -1
-                elif cexp(-1.0 * ediff/temp) > crand()/float(RAND_MAX):
-                    svec[sidx] *= -1
-                # Reset energy diff value
-                ediff = 0.0
-            sidx_shuff = rng.permutation(sidx_shuff)
+    with nogil:
+        for itemp in xrange(schedsize):
+            # Get temperature
+            temp = sched[itemp]
+            # Do some number of Monte Carlo steps
+            for step in xrange(mcsteps):
+                # Fisher-Yates shuffling algorithm
+                # cannot use numpy.random.permutation due to nogil
+                for i in xrange(nspins):
+                    ispins[i] = i
+                for i in xrange(nspins, 0, -1):
+                    j = crand() % i
+                    t = ispins[i-1]
+                    ispins[i-1] = ispins[j]
+                    ispins[j] = t
+                # Loop over spins
+                for ispin in xrange(nspins):
+                    sidx = ispins[ispin]
+                    # loop through the given spin's neighbors
+                    for si in xrange(maxnb):
+                        # get the neighbor spin index
+                        spinidx = int(nbs[sidx,si,0])
+                        # get the coupling value to that neighbor
+                        jval = nbs[sidx,si,1]
+                        # self-connections are not quadratic
+                        if spinidx == sidx:
+                            ediff += -2.0*float(svec[sidx])*jval
+                        # calculate the energy diff of flipping this spin
+                        else:
+                            ediff += -2.0*float(svec[sidx])*(jval*float(svec[spinidx]))
+                    # Metropolis accept or reject
+                    if ediff <= 0.0:  # avoid overflow
+                        svec[sidx] *= -1
+                    elif cexp(-1.0 * ediff/temp) > crand()/float(RAND_MAX):
+                        svec[sidx] *= -1
+                    # Reset energy diff value
+                    ediff = 0.0
 
 
 @cython.boundscheck(False)
